@@ -1,179 +1,341 @@
-# ──────────────────────────────────────────────────────────────────────
-# 📌 Docker Compose Configuration for Secure qBittorrent with VPN
-# ──────────────────────────────────────────────────────────────────────
-# ✅ Production-grade infrastructure as code setup
-# ✅ Full observability with monitoring and logging
-# ✅ Network segmentation and security hardening
-# ✅ Automated health checks and service dependencies
-# ──────────────────────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════
+# 📌 DOCKER COMPOSE CONFIGURATION
+# ══════════════════════════════════════════════════════════════════════
+#
+# This file defines all the services (containers) for running qBittorrent
+# securely through a ProtonVPN connection with full monitoring.
+#
+# WHAT THIS DOES:
+# - Runs a VPN connection (Gluetun) that routes all torrent traffic
+# - Runs qBittorrent for downloading torrents (traffic goes through VPN)
+# - Runs monitoring tools to track performance and logs
+# - Automatically updates containers when new versions are available
+#
+# HOW TO USE:
+# 1. Copy .env.example to .env and fill in your credentials
+# 2. Run: make up (or docker-compose up -d)
+# 3. Access qBittorrent at http://localhost:8080
+#
+# ══════════════════════════════════════════════════════════════════════
 
 version: '3.9'
 
 # ──────────────────────────────────────────────────────────────────────
-# 🌐 NETWORKS - Proper network segmentation for security
+# 🌐 NETWORKS - How containers talk to each other
 # ──────────────────────────────────────────────────────────────────────
+#
+# Think of networks like separate LANs in your home:
+# - VPN Network: Where the VPN and torrent traffic lives (isolated)
+# - Monitoring Network: Where monitoring tools communicate
+#
+# WHY SEPARATE NETWORKS?
+# - Security: Keeps torrent traffic isolated from monitoring
+# - Organization: Clear separation of concerns
+# - Control: Each network has its own firewall rules
+#
 networks:
+  # Network for VPN and torrent traffic
   vpn_network:
-    driver: bridge
-    internal: false
-    ipam:
+    driver: bridge                    # Standard Docker network type
+    internal: false                   # Allows internet access (needed for VPN)
+    ipam:                            # IP Address Management
       driver: default
       config:
-        - subnet: 172.20.0.0/16
+        - subnet: 172.20.0.0/16      # IP range for this network (65,536 addresses)
     driver_opts:
-      com.docker.network.bridge.name: br-vpn
-      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.name: br-vpn                    # Custom name for the network interface
+      com.docker.network.bridge.enable_ip_masquerade: "true"   # Enable NAT (Network Address Translation)
 
+  # Network for monitoring tools (Prometheus, Grafana, etc.)
   monitoring_network:
     driver: bridge
-    internal: false
+    internal: false                   # Needs internet to pull updates
     ipam:
       driver: default
       config:
-        - subnet: 172.21.0.0/16
+        - subnet: 172.21.0.0/16      # Different IP range from VPN network
 
 # ──────────────────────────────────────────────────────────────────────
-# 💾 VOLUMES - Named volumes for better management
+# 💾 VOLUMES - Persistent data storage
 # ──────────────────────────────────────────────────────────────────────
+#
+# WHAT ARE VOLUMES?
+# Volumes are like external hard drives for Docker containers.
+# When a container restarts, it loses all data UNLESS it's in a volume.
+#
+# WHY WE NEED THEM?
+# - Keep your settings when containers restart
+# - Store metrics and logs over time
+# - Preserve VPN configurations
+#
 volumes:
-  gluetun-config:
-    driver: local
-  qbittorrent-config:
-    driver: local
-  prometheus-data:
-    driver: local
-  grafana-data:
-    driver: local
-  loki-data:
+  gluetun-config:          # Stores VPN connection settings
+    driver: local          # Stored on the local machine
+
+  qbittorrent-config:      # Stores qBittorrent settings and torrent state
     driver: local
 
-# ──────────────────────────────────────────────────────────────────────
-# 🐳 SERVICES
-# ──────────────────────────────────────────────────────────────────────
+  prometheus-data:         # Stores performance metrics (30 days of data)
+    driver: local
+
+  grafana-data:           # Stores dashboards and user preferences
+    driver: local
+
+  loki-data:              # Stores log data (31 days of logs)
+    driver: local
+
+# ══════════════════════════════════════════════════════════════════════
+# 🐳 SERVICES - The actual applications
+# ══════════════════════════════════════════════════════════════════════
+#
+# Each service is like a separate computer running a specific program.
+# They all run on your machine but are isolated from each other.
+#
 services:
 
-  # ──────────────────────────────────────────────────────────────────────
-  # 🛡️ VPN CONTAINER (Gluetun) - Provides secure ProtonVPN connection
-  # ──────────────────────────────────────────────────────────────────────
+  # ────────────────────────────────────────────────────────────────────
+  # 🛡️ GLUETUN - VPN Connection Manager
+  # ────────────────────────────────────────────────────────────────────
+  #
+  # WHAT IT DOES:
+  # - Establishes a secure VPN tunnel to ProtonVPN servers
+  # - Routes all traffic through the VPN (prevents IP leaks)
+  # - Automatically forwards ports for better torrent performance
+  # - Blocks ads and malicious sites
+  #
+  # WHY IT'S IMPORTANT:
+  # This is your privacy shield. All torrent traffic MUST go through
+  # this VPN. If Gluetun stops, qBittorrent automatically stops too.
+  #
   gluetun:
+    # Which container image to use (specific version for reliability)
     image: ghcr.io/qdm12/gluetun:v3.39.1
+
+    # Container name (what you'll see in 'docker ps')
     container_name: gluetun
     hostname: gluetun
+
+    # Restart policy: restart unless manually stopped
     restart: unless-stopped
 
+    # Network connections (Gluetun connects to BOTH networks)
     networks:
       vpn_network:
-        ipv4_address: 172.20.0.10
-      monitoring_network:
+        ipv4_address: 172.20.0.10    # Fixed IP address for predictability
+      monitoring_network:             # Also connected here so monitors can check VPN status
 
+    # ┌─────────────────────────────────────────────────────────────┐
+    # │ SECURITY SETTINGS                                            │
+    # └─────────────────────────────────────────────────────────────┘
+
+    # Special permissions needed for VPN (NET_ADMIN = network administration)
     cap_add:
-      - NET_ADMIN
+      - NET_ADMIN                     # Allows creating VPN tunnels
 
+    # Drop all other capabilities (principle of least privilege)
     cap_drop:
-      - ALL
+      - ALL                           # Remove all permissions except NET_ADMIN
 
+    # Special device needed for VPN tunneling
     devices:
-      - /dev/net/tun:/dev/net/tun
+      - /dev/net/tun:/dev/net/tun    # TUN device creates virtual network interface
 
+    # System-level network settings
     sysctls:
-      - net.ipv6.conf.all.disable_ipv6=1
-      - net.ipv4.conf.all.src_valid_mark=1
+      - net.ipv6.conf.all.disable_ipv6=1            # Disable IPv6 (prevents IPv6 leaks)
+      - net.ipv4.conf.all.src_valid_mark=1          # Enable source validation
 
+    # Additional security options
     security_opt:
-      - no-new-privileges:true
+      - no-new-privileges:true        # Prevents gaining more privileges
 
+    # ┌─────────────────────────────────────────────────────────────┐
+    # │ ENVIRONMENT VARIABLES - Configuration Settings              │
+    # └─────────────────────────────────────────────────────────────┘
+    #
+    # These values come from your .env file (keep it secret!)
+    #
     environment:
-      # VPN Configuration
-      - VPN_SERVICE_PROVIDER=protonvpn
-      - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-      - SERVER_COUNTRIES=${SERVER_COUNTRIES:-Netherlands}
-      - SERVER_CITIES=${SERVER_CITIES}
-      - VPN_PORT_FORWARDING=on
-      - VPN_PORT_FORWARDING_LISTENING_PORT=${VPN_FORWARDED_PORT:-0}
+      # ─── VPN Configuration ───
+      - VPN_SERVICE_PROVIDER=protonvpn              # Which VPN service to use
+      - VPN_TYPE=wireguard                          # WireGuard protocol (fast & secure)
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}  # Your secret key from ProtonVPN
+      - SERVER_COUNTRIES=${SERVER_COUNTRIES:-Netherlands}  # Which country's servers to use
+      - SERVER_CITIES=${SERVER_CITIES}              # (Optional) Specific city
+      - VPN_PORT_FORWARDING=on                      # Enable port forwarding for better speeds
+      - VPN_PORT_FORWARDING_LISTENING_PORT=${VPN_FORWARDED_PORT:-0}  # Port number (0 = auto)
 
-      # Security & Performance
-      - FIREWALL_OUTBOUND_SUBNETS=172.20.0.0/16,172.21.0.0/16
-      - FIREWALL_VPN_INPUT_PORTS=${VPN_FORWARDED_PORT:-0}
-      - DOT=on
-      - DOT_PROVIDERS=cloudflare
-      - BLOCK_MALICIOUS=on
-      - BLOCK_SURVEILLANCE=on
+      # ─── Security Features ───
+      - FIREWALL_OUTBOUND_SUBNETS=172.20.0.0/16,172.21.0.0/16  # Allow traffic to these networks
+      - FIREWALL_VPN_INPUT_PORTS=${VPN_FORWARDED_PORT:-0}      # Which ports to allow through VPN
+      - DOT=on                                      # DNS over TLS (encrypted DNS)
+      - DOT_PROVIDERS=cloudflare                    # Use Cloudflare for DNS
+      - BLOCK_MALICIOUS=on                          # Block known malicious sites
+      - BLOCK_SURVEILLANCE=on                       # Block surveillance/tracking sites
 
-      # Timezone & Logging
-      - TZ=${TZ:-UTC}
-      - LOG_LEVEL=${LOG_LEVEL:-info}
-      - HEALTH_VPN_DURATION_INITIAL=30s
-      - HEALTH_SUCCESS_WAIT_DURATION=10s
+      # ─── General Settings ───
+      - TZ=${TZ:-UTC}                               # Timezone (for logs)
+      - LOG_LEVEL=${LOG_LEVEL:-info}                # How much logging (info, debug, error)
+      - HEALTH_VPN_DURATION_INITIAL=30s             # Wait 30s before first health check
+      - HEALTH_SUCCESS_WAIT_DURATION=10s            # Wait 10s between health checks
 
+    # Where to store persistent data
     volumes:
-      - gluetun-config:/gluetun
+      - gluetun-config:/gluetun       # VPN configuration storage
 
+    # ┌─────────────────────────────────────────────────────────────┐
+    # │ PORT MAPPINGS - How to access services                      │
+    # └─────────────────────────────────────────────────────────────┘
+    #
+    # Format: "HOST_PORT:CONTAINER_PORT"
+    # - HOST_PORT: The port on your computer
+    # - CONTAINER_PORT: The port inside the container
+    #
     ports:
-      - "8080:8080"    # qBittorrent Web UI
-      - "8000:8000"    # Gluetun HTTP control server
+      - "8080:8080"    # qBittorrent Web UI (access at http://localhost:8080)
+      - "8000:8000"    # Gluetun control server (for advanced users)
 
+    # ┌─────────────────────────────────────────────────────────────┐
+    # │ HEALTH CHECK - Is the VPN working?                          │
+    # └─────────────────────────────────────────────────────────────┘
+    #
+    # This regularly checks if the VPN is connected by trying to
+    # reach Google. If it fails, Docker marks the container as unhealthy.
+    #
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "--timeout=3", "--tries=1", "https://www.google.com"]
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
+      interval: 60s          # Check every 60 seconds
+      timeout: 10s           # Fail if check takes longer than 10 seconds
+      retries: 3             # Try 3 times before marking unhealthy
+      start_period: 30s      # Wait 30s after startup before first check
 
+    # Labels for automation and organization
     labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-      - "logging=promtail"
-      - "logging_jobname=gluetun"
+      - "com.centurylinklabs.watchtower.enable=true"  # Allow auto-updates
+      - "logging=promtail"                             # Send logs to Promtail
+      - "logging_jobname=gluetun"                      # Label for log identification
 
-  # ──────────────────────────────────────────────────────────────────────
-  # 📂 TORRENT CLIENT (qBittorrent) - Secure torrenting through VPN
-  # ──────────────────────────────────────────────────────────────────────
+  # ────────────────────────────────────────────────────────────────────
+  # 📂 QBITTORRENT - Torrent Client
+  # ────────────────────────────────────────────────────────────────────
+  #
+  # WHAT IT DOES:
+  # - Downloads and uploads torrents
+  # - Provides a web interface for managing torrents
+  # - All traffic is forced through the VPN (shares Gluetun's network)
+  #
+  # SECURITY NOTE:
+  # qBittorrent uses "network_mode: service:gluetun" which means it
+  # shares the VPN's network namespace. This makes it IMPOSSIBLE for
+  # qBittorrent to connect to the internet without going through the VPN.
+  #
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:4.6.7
     container_name: qbittorrent
     hostname: qbittorrent
     restart: unless-stopped
 
+    # ┌─────────────────────────────────────────────────────────────┐
+    # │ NETWORK CONFIGURATION - The Security Magic                  │
+    # └─────────────────────────────────────────────────────────────┘
+    #
+    # This is THE MOST IMPORTANT security feature:
+    # By using "service:gluetun", qBittorrent shares Gluetun's network.
+    # It's like two programs sharing the same internet connection.
+    #
+    # RESULT: qBittorrent can ONLY access internet through the VPN.
+    # If VPN stops, qBittorrent automatically loses internet access.
+    #
     network_mode: "service:gluetun"
 
+    # Wait for Gluetun to be healthy before starting
+    # (Makes sure VPN is connected before torrents start)
     depends_on:
       gluetun:
-        condition: service_healthy
+        condition: service_healthy    # Only start when Gluetun passes health check
 
+    # Security settings
     security_opt:
-      - no-new-privileges:true
+      - no-new-privileges:true        # Prevent privilege escalation
 
+    # ┌─────────────────────────────────────────────────────────────┐
+    # │ CONFIGURATION                                                │
+    # └─────────────────────────────────────────────────────────────┘
     environment:
-      - PUID=${PUID:-1000}
-      - PGID=${PGID:-1000}
-      - TZ=${TZ:-UTC}
-      - WEBUI_PORT=8080
-      - TORRENTING_PORT=${VPN_FORWARDED_PORT:-6881}
+      # User permissions (prevents permission issues with files)
+      - PUID=${PUID:-1000}            # User ID (run 'id -u' to find yours)
+      - PGID=${PGID:-1000}            # Group ID (run 'id -g' to find yours)
 
-      # Docker Mods for port sync
+      # General settings
+      - TZ=${TZ:-UTC}                 # Timezone
+      - WEBUI_PORT=8080               # Web interface port
+      - TORRENTING_PORT=${VPN_FORWARDED_PORT:-6881}  # Port for torrent connections
+
+      # ─── Special Modifications (Mods) ───
+      # These add extra features to the container
       - DOCKER_MODS=ghcr.io/gabe565/linuxserver-mod-vuetorrent|ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main
-      - GSP_GTN_API_KEY=${GSP_GTN_API_KEY}
-      - GSP_QBITTORRENT_PORT=${VPN_FORWARDED_PORT:-6881}
-      - GSP_MINIMAL_LOGS=false
+      #   1. VueTorrent: Modern, beautiful web UI
+      #   2. Port Sync Mod: Automatically updates qBittorrent when VPN port changes
 
+      # Port sync configuration
+      - GSP_GTN_API_KEY=${GSP_GTN_API_KEY}          # API key for secure communication
+      - GSP_QBITTORRENT_PORT=${VPN_FORWARDED_PORT:-6881}  # Port to sync
+      - GSP_MINIMAL_LOGS=false                      # Show all logs (helpful for debugging)
+
+    # ┌─────────────────────────────────────────────────────────────┐
+    # │ STORAGE - Where your files go                               │
+    # └─────────────────────────────────────────────────────────────┘
     volumes:
-      - qbittorrent-config:/config
-      - ${DOWNLOADS_PATH:-./downloads}:/downloads
-      - ${INCOMPLETE_PATH:-./incomplete}:/incomplete
+      - qbittorrent-config:/config                  # Settings and torrent state
+      - ${DOWNLOADS_PATH:-./downloads}:/downloads   # Completed downloads
+      - ${INCOMPLETE_PATH:-./incomplete}:/incomplete  # In-progress downloads
 
+    # ┌─────────────────────────────────────────────────────────────┐
+    # │ PERFORMANCE TUNING                                           │
+    # └─────────────────────────────────────────────────────────────┘
+    #
+    # ulimits control system resource limits
+    # nofile = number of open files (important for torrents with many files)
+    #
     ulimits:
       nofile:
-        soft: 32768
-        hard: 65536
+        soft: 32768       # Normal limit
+        hard: 65536       # Maximum limit (can use up to this many)
 
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
       - "logging=promtail"
       - "logging_jobname=qbittorrent"
 
-  # ──────────────────────────────────────────────────────────────────────
-  # 📊 MONITORING - Prometheus for metrics collection
-  # ──────────────────────────────────────────────────────────────────────
+  # ════════════════════════════════════════════════════════════════════
+  # 📊 MONITORING SERVICES
+  # ════════════════════════════════════════════════════════════════════
+  #
+  # The following services help you monitor your infrastructure:
+  # - Prometheus: Collects metrics (CPU, RAM, network usage, etc.)
+  # - Grafana: Creates beautiful dashboards from metrics
+  # - Loki: Collects and stores logs
+  # - Promtail: Ships logs from containers to Loki
+  # - cAdvisor: Monitors Docker container resource usage
+  #
+  # WHY MONITORING?
+  # - See if VPN is working properly
+  # - Track download speeds
+  # - Get alerted when something breaks
+  # - Troubleshoot issues with historical data
+  #
+
+  # ────────────────────────────────────────────────────────────────────
+  # 📊 PROMETHEUS - Metrics Database
+  # ────────────────────────────────────────────────────────────────────
+  #
+  # WHAT IT DOES:
+  # - Collects metrics every 30 seconds from all services
+  # - Stores metrics for 30 days
+  # - Evaluates alerting rules (VPN down, high CPU, etc.)
+  #
+  # ACCESS: http://localhost:9090
+  #
   prometheus:
     image: prom/prometheus:v2.55.0
     container_name: prometheus
@@ -186,21 +348,24 @@ services:
     security_opt:
       - no-new-privileges:true
 
+    # Command-line options for Prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=30d'
+      - '--config.file=/etc/prometheus/prometheus.yml'  # Configuration file location
+      - '--storage.tsdb.path=/prometheus'               # Where to store data
+      - '--storage.tsdb.retention.time=30d'             # Keep data for 30 days
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
-      - '--web.enable-lifecycle'
+      - '--web.enable-lifecycle'                        # Allow reload via API
 
     volumes:
+      # Configuration files (read-only)
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      # Data storage (read-write)
       - prometheus-data:/prometheus
 
     ports:
-      - "9090:9090"
+      - "9090:9090"    # Web UI for Prometheus
 
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
@@ -211,9 +376,18 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
-  # ──────────────────────────────────────────────────────────────────────
-  # 📈 VISUALIZATION - Grafana for dashboards
-  # ──────────────────────────────────────────────────────────────────────
+  # ────────────────────────────────────────────────────────────────────
+  # 📈 GRAFANA - Visualization Dashboard
+  # ────────────────────────────────────────────────────────────────────
+  #
+  # WHAT IT DOES:
+  # - Creates beautiful, interactive dashboards
+  # - Visualizes data from Prometheus and Loki
+  # - Sends alerts when things go wrong
+  #
+  # ACCESS: http://localhost:3000
+  # DEFAULT LOGIN: admin / admin (change on first login!)
+  #
   grafana:
     image: grafana/grafana:11.3.1
     container_name: grafana
@@ -227,22 +401,30 @@ services:
       - no-new-privileges:true
 
     environment:
+      # Admin user credentials (CHANGE THESE!)
       - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+
+      # Plugins to install automatically
       - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-clock-panel
-      - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_SERVER_ROOT_URL=http://localhost:3000
+
+      # Security settings
+      - GF_USERS_ALLOW_SIGN_UP=false              # Don't allow new user registration
+      - GF_SERVER_ROOT_URL=http://localhost:3000  # Base URL
+
+      # Privacy settings (disable analytics)
       - GF_ANALYTICS_REPORTING_ENABLED=false
       - GF_ANALYTICS_CHECK_FOR_UPDATES=false
 
     volumes:
-      - grafana-data:/var/lib/grafana
-      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana                                       # User data
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro      # Auto-config
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro      # Dashboards
 
     ports:
-      - "3000:3000"
+      - "3000:3000"    # Grafana web interface
 
+    # Wait for Prometheus to be ready
     depends_on:
       - prometheus
 
@@ -255,9 +437,17 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
-  # ──────────────────────────────────────────────────────────────────────
-  # 🐳 DOCKER METRICS - cAdvisor for container metrics
-  # ──────────────────────────────────────────────────────────────────────
+  # ────────────────────────────────────────────────────────────────────
+  # 🐳 CADVISOR - Container Metrics
+  # ────────────────────────────────────────────────────────────────────
+  #
+  # WHAT IT DOES:
+  # - Monitors Docker container resource usage
+  # - Tracks CPU, memory, network, and disk usage
+  # - Provides data to Prometheus
+  #
+  # ACCESS: http://localhost:8081
+  #
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.50.0
     container_name: cadvisor
@@ -267,20 +457,22 @@ services:
     networks:
       - monitoring_network
 
+    # Needs privileged mode to see all container data
     privileged: true
 
     devices:
-      - /dev/kmsg
+      - /dev/kmsg    # Kernel messages
 
+    # Mount system directories (read-only) to collect metrics
     volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
+      - /:/rootfs:ro                      # Root filesystem
+      - /var/run:/var/run:ro              # Docker socket
+      - /sys:/sys:ro                      # System information
+      - /var/lib/docker/:/var/lib/docker:ro  # Docker data
+      - /dev/disk/:/dev/disk:ro           # Disk information
 
     ports:
-      - "8081:8080"
+      - "8081:8080"    # Web UI (using 8081 to avoid conflict with qBittorrent)
 
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
@@ -289,11 +481,22 @@ services:
       retries: 3
 
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=false"  # Don't auto-update (stability)
 
-  # ──────────────────────────────────────────────────────────────────────
-  # 📝 LOGGING - Loki for log aggregation
-  # ──────────────────────────────────────────────────────────────────────
+  # ────────────────────────────────────────────────────────────────────
+  # 📝 LOKI - Log Aggregation
+  # ────────────────────────────────────────────────────────────────────
+  #
+  # WHAT IT DOES:
+  # - Collects logs from all containers
+  # - Stores logs for 31 days
+  # - Makes logs searchable in Grafana
+  #
+  # WHY IT'S USEFUL:
+  # - See all logs in one place
+  # - Search across all containers
+  # - Correlate logs with metrics
+  #
   loki:
     image: grafana/loki:3.2.1
     container_name: loki
@@ -313,7 +516,7 @@ services:
       - loki-data:/loki
 
     ports:
-      - "3100:3100"
+      - "3100:3100"    # API for receiving logs
 
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
@@ -324,9 +527,15 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
-  # ──────────────────────────────────────────────────────────────────────
-  # 📤 LOG SHIPPING - Promtail for log collection
-  # ──────────────────────────────────────────────────────────────────────
+  # ────────────────────────────────────────────────────────────────────
+  # 📤 PROMTAIL - Log Shipper
+  # ────────────────────────────────────────────────────────────────────
+  #
+  # WHAT IT DOES:
+  # - Reads logs from Docker containers
+  # - Sends logs to Loki for storage
+  # - Labels logs for easy filtering
+  #
   promtail:
     image: grafana/promtail:3.2.1
     container_name: promtail
@@ -343,8 +552,8 @@ services:
 
     volumes:
       - ./monitoring/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro  # Container logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro              # Docker API
 
     depends_on:
       - loki
@@ -352,9 +561,23 @@ services:
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
 
-  # ──────────────────────────────────────────────────────────────────────
-  # 🔄 WATCHTOWER - Automatic container updates
-  # ──────────────────────────────────────────────────────────────────────
+  # ────────────────────────────────────────────────────────────────────
+  # 🔄 WATCHTOWER - Automatic Updates
+  # ────────────────────────────────────────────────────────────────────
+  #
+  # WHAT IT DOES:
+  # - Checks for new container versions daily
+  # - Automatically updates containers with newer versions
+  # - Only updates containers with the label "watchtower.enable=true"
+  # - Cleans up old images to save disk space
+  #
+  # WHY IT'S USEFUL:
+  # - Stay up-to-date with security patches
+  # - Get new features automatically
+  # - No manual intervention needed
+  #
+  # NOTE: It won't update itself (for stability)
+  #
   watchtower:
     image: containrrr/watchtower:1.7.1
     container_name: watchtower
@@ -368,16 +591,41 @@ services:
       - no-new-privileges:true
 
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # Needs Docker access (read-only)
 
     environment:
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_POLL_INTERVAL=86400
-      - WATCHTOWER_LABEL_ENABLE=true
-      - WATCHTOWER_INCLUDE_RESTARTING=true
-      - WATCHTOWER_ROLLING_RESTART=true
-      - WATCHTOWER_TIMEOUT=30s
-      - TZ=${TZ:-UTC}
+      - WATCHTOWER_CLEANUP=true                 # Remove old images after updating
+      - WATCHTOWER_POLL_INTERVAL=86400          # Check every 24 hours (86400 seconds)
+      - WATCHTOWER_LABEL_ENABLE=true            # Only update labeled containers
+      - WATCHTOWER_INCLUDE_RESTARTING=true      # Update even if container is restarting
+      - WATCHTOWER_ROLLING_RESTART=true         # Update one at a time (safer)
+      - WATCHTOWER_TIMEOUT=30s                  # Wait 30s for graceful shutdown
+      - TZ=${TZ:-UTC}                           # Timezone
 
     labels:
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=false"  # Don't update itself
+
+# ══════════════════════════════════════════════════════════════════════
+# 🎉 THAT'S IT!
+# ══════════════════════════════════════════════════════════════════════
+#
+# QUICK REFERENCE:
+#
+# Start everything:          make up  (or docker-compose up -d)
+# Stop everything:           make down
+# View logs:                 make logs
+# Test VPN:                  make test-vpn
+# Create backup:             make backup
+#
+# ACCESS YOUR SERVICES:
+# - qBittorrent:  http://localhost:8080
+# - Grafana:      http://localhost:3000  (admin/admin)
+# - Prometheus:   http://localhost:9090
+# - cAdvisor:     http://localhost:8081
+#
+# NEED HELP?
+# - Documentation: See docs/ folder
+# - Commands:      Run 'make help'
+# - Issues:        Check logs with 'make logs'
+#
+# ══════════════════════════════════════════════════════════════════════
