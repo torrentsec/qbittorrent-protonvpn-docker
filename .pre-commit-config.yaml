@@ -1,0 +1,64 @@
+---
+# Pre-commit hooks configuration
+# Install: pip install pre-commit
+# Setup: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom YAML tags in docker-compose
+      - id: check-added-large-files
+        args: ['--maxkb=1024']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+      - id: detect-private-key
+      - id: check-executables-have-shebangs
+
+  # Shell script linting
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.10.0.1
+    hooks:
+      - id: shellcheck
+        args: ['--severity=warning']
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+
+  # Docker-compose validation
+  - repo: local
+    hooks:
+      - id: docker-compose-check
+        name: Validate docker-compose.yml
+        entry: docker-compose
+        args: ['config', '-q']
+        language: system
+        files: docker-compose.yml
+        pass_filenames: false
+
+  # Environment file check
+  - repo: local
+    hooks:
+      - id: env-check
+        name: Check for .env in commits
+        entry: bash -c 'if git diff --cached --name-only | grep -q "^\.env$"; then echo "ERROR: .env file should not be committed!"; exit 1; fi'
+        language: system
+        pass_filenames: false
+        always_run: true
+
+  # YAML linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: ['-d', '{extends: default, rules: {line-length: {max: 120}}}']
