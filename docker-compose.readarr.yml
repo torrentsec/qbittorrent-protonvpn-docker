@@ -1,0 +1,41 @@
+# ──────────────────────────────────────────────────────────────────────
+# 📚 Readarr - Book & Audiobook Management & Automation
+# ──────────────────────────────────────────────────────────────────────
+# This module adds Readarr to your media stack for automatic book and
+# audiobook downloading, monitoring, and organization.
+#
+# To enable: docker-compose -f docker-compose.yml -f docker-compose.readarr.yml up -d
+# To disable: Remove this file from the docker-compose command
+# ──────────────────────────────────────────────────────────────────────
+
+services:
+  readarr:
+    image: lscr.io/linuxserver/readarr:develop
+    container_name: readarr
+    restart: unless-stopped
+
+    # ─── Network Configuration ─────────────────────────────────────────
+    # Routes through Gluetun VPN for privacy
+    network_mode: "service:gluetun"
+
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+    # ─── Environment Configuration ─────────────────────────────────────
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+    # ─── Persistent Storage ────────────────────────────────────────────
+    volumes:
+      - ./readarr:/config
+      - ./downloads:/downloads
+      - ./media/books:/books
+
+    # ─── Resource Limits (Optional) ────────────────────────────────────
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1G

@@ -11,6 +11,15 @@ wireguard.conf
 # Ignore Docker volumes (optional, if you don't want them included)
 gluetun/
 qbittorrent/
+sonarr/
+radarr/
+lidarr/
+prowlarr/
+readarr/
+bazarr/
+media/
+downloads/
+incomplete/
 
 # Ignore macOS system files (if applicable)
 .DS_Store

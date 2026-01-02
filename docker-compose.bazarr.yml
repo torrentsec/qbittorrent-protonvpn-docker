@@ -1,0 +1,41 @@
+# ──────────────────────────────────────────────────────────────────────
+# 💬 Bazarr - Subtitle Management & Automation
+# ──────────────────────────────────────────────────────────────────────
+# This module adds Bazarr to your media stack for automatic subtitle
+# downloading and management for Sonarr and Radarr.
+#
+# To enable: docker-compose -f docker-compose.yml -f docker-compose.bazarr.yml up -d
+# To disable: Remove this file from the docker-compose command
+# ──────────────────────────────────────────────────────────────────────
+
+services:
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+
+    # ─── Network Configuration ─────────────────────────────────────────
+    # Routes through Gluetun VPN for privacy
+    network_mode: "service:gluetun"
+
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+    # ─── Environment Configuration ─────────────────────────────────────
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+    # ─── Persistent Storage ────────────────────────────────────────────
+    volumes:
+      - ./bazarr:/config
+      - ./media/tv:/tv
+      - ./media/movies:/movies
+
+    # ─── Resource Limits (Optional) ────────────────────────────────────
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M

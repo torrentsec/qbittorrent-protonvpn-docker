@@ -1,0 +1,41 @@
+# ──────────────────────────────────────────────────────────────────────
+# 🎬 Radarr - Movie Management & Automation
+# ──────────────────────────────────────────────────────────────────────
+# This module adds Radarr to your media stack for automatic movie
+# downloading, monitoring, and organization.
+#
+# To enable: docker-compose -f docker-compose.yml -f docker-compose.radarr.yml up -d
+# To disable: Remove this file from the docker-compose command
+# ──────────────────────────────────────────────────────────────────────
+
+services:
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+
+    # ─── Network Configuration ─────────────────────────────────────────
+    # Routes through Gluetun VPN for privacy
+    network_mode: "service:gluetun"
+
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+    # ─── Environment Configuration ─────────────────────────────────────
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+    # ─── Persistent Storage ────────────────────────────────────────────
+    volumes:
+      - ./radarr:/config
+      - ./downloads:/downloads
+      - ./media/movies:/movies
+
+    # ─── Resource Limits (Optional) ────────────────────────────────────
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1G

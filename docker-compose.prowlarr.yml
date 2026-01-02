@@ -1,0 +1,39 @@
+# ──────────────────────────────────────────────────────────────────────
+# 🔍 Prowlarr - Indexer Manager for *arr Apps
+# ──────────────────────────────────────────────────────────────────────
+# This module adds Prowlarr to your media stack for centralized indexer
+# management across all your *arr applications.
+#
+# To enable: docker-compose -f docker-compose.yml -f docker-compose.prowlarr.yml up -d
+# To disable: Remove this file from the docker-compose command
+# ──────────────────────────────────────────────────────────────────────
+
+services:
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    restart: unless-stopped
+
+    # ─── Network Configuration ─────────────────────────────────────────
+    # Routes through Gluetun VPN for privacy
+    network_mode: "service:gluetun"
+
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+    # ─── Environment Configuration ─────────────────────────────────────
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+    # ─── Persistent Storage ────────────────────────────────────────────
+    volumes:
+      - ./prowlarr:/config
+
+    # ─── Resource Limits (Optional) ────────────────────────────────────
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 512M

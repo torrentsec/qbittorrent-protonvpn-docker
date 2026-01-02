@@ -1,0 +1,41 @@
+# ──────────────────────────────────────────────────────────────────────
+# 📺 Sonarr - TV Series Management & Automation
+# ──────────────────────────────────────────────────────────────────────
+# This module adds Sonarr to your media stack for automatic TV show
+# downloading, monitoring, and organization.
+#
+# To enable: docker-compose -f docker-compose.yml -f docker-compose.sonarr.yml up -d
+# To disable: Remove this file from the docker-compose command
+# ──────────────────────────────────────────────────────────────────────
+
+services:
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+
+    # ─── Network Configuration ─────────────────────────────────────────
+    # Routes through Gluetun VPN for privacy
+    network_mode: "service:gluetun"
+
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+    # ─── Environment Configuration ─────────────────────────────────────
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+    # ─── Persistent Storage ────────────────────────────────────────────
+    volumes:
+      - ./sonarr:/config
+      - ./downloads:/downloads
+      - ./media/tv:/tv
+
+    # ─── Resource Limits (Optional) ────────────────────────────────────
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1G

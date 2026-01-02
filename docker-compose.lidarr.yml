@@ -1,0 +1,41 @@
+# ──────────────────────────────────────────────────────────────────────
+# 🎵 Lidarr - Music Management & Automation
+# ──────────────────────────────────────────────────────────────────────
+# This module adds Lidarr to your media stack for automatic music
+# downloading, monitoring, and organization.
+#
+# To enable: docker-compose -f docker-compose.yml -f docker-compose.lidarr.yml up -d
+# To disable: Remove this file from the docker-compose command
+# ──────────────────────────────────────────────────────────────────────
+
+services:
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    restart: unless-stopped
+
+    # ─── Network Configuration ─────────────────────────────────────────
+    # Routes through Gluetun VPN for privacy
+    network_mode: "service:gluetun"
+
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+    # ─── Environment Configuration ─────────────────────────────────────
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+    # ─── Persistent Storage ────────────────────────────────────────────
+    volumes:
+      - ./lidarr:/config
+      - ./downloads:/downloads
+      - ./media/music:/music
+
+    # ─── Resource Limits (Optional) ────────────────────────────────────
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 1G

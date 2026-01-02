@@ -49,7 +49,13 @@ services:
 
     # ─── Exposed Ports ─────────────────────────────────────────────────
     ports:
-      - "8080:8080"  # ✅ Exposes qBittorrent Web UI to localhost
+      - "8080:8080"  # ✅ qBittorrent Web UI
+      - "8989:8989"  # 📺 Sonarr Web UI (optional - only if using Sonarr)
+      - "7878:7878"  # 🎬 Radarr Web UI (optional - only if using Radarr)
+      - "8686:8686"  # 🎵 Lidarr Web UI (optional - only if using Lidarr)
+      - "9696:9696"  # 🔍 Prowlarr Web UI (optional - only if using Prowlarr)
+      - "8787:8787"  # 📚 Readarr Web UI (optional - only if using Readarr)
+      - "6767:6767"  # 💬 Bazarr Web UI (optional - only if using Bazarr)
 
     # ─── Health Check ──────────────────────────────────────────────────
     healthcheck:
