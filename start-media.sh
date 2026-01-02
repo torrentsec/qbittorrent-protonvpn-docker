@@ -1,6 +1,6 @@
 #!/bin/bash
 # ──────────────────────────────────────────────────────────────────────
-# 🚀 Start Media Stack (Base + Sonarr + Radarr + Prowlarr + Bazarr)
+# 🚀 Start Media Stack (Base + Sonarr + Radarr + Prowlarr + Bazarr + Essentials)
 # ──────────────────────────────────────────────────────────────────────
 
 echo "🚀 Starting media stack..."
@@ -10,13 +10,21 @@ docker-compose \
   -f docker-compose.radarr.yml \
   -f docker-compose.prowlarr.yml \
   -f docker-compose.bazarr.yml \
+  -f docker-compose.homepage.yml \
+  -f docker-compose.recyclarr.yml \
+  -f docker-compose.unpackerr.yml \
   up -d
 
 echo "✅ Media stack started!"
 echo ""
 echo "📺 Access your services at:"
+echo "   - Homepage:    http://localhost:3000  ⭐ (Start here!)"
 echo "   - qBittorrent: http://localhost:8080"
 echo "   - Sonarr:      http://localhost:8989"
 echo "   - Radarr:      http://localhost:7878"
 echo "   - Prowlarr:    http://localhost:9696"
 echo "   - Bazarr:      http://localhost:6767"
+echo ""
+echo "🔧 Background services running:"
+echo "   - Recyclarr:   Auto-syncing TRaSH Guide profiles"
+echo "   - Unpackerr:   Auto-extracting archives"

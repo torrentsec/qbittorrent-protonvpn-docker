@@ -1,0 +1,44 @@
+# ──────────────────────────────────────────────────────────────────────
+# 🏠 Homepage - Unified Dashboard for All Services
+# ──────────────────────────────────────────────────────────────────────
+# A modern, fast dashboard showing all your services in one place with
+# real-time status monitoring and service integrations.
+#
+# To enable: docker-compose -f docker-compose.yml -f docker-compose.homepage.yml up -d
+# To disable: Remove this file from the docker-compose command
+# ──────────────────────────────────────────────────────────────────────
+
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+
+    # ─── Environment Configuration ─────────────────────────────────────
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+    # ─── Persistent Storage ────────────────────────────────────────────
+    volumes:
+      - ./homepage:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro  # For Docker integration
+
+    # ─── Exposed Ports ─────────────────────────────────────────────────
+    ports:
+      - "3000:3000"  # Homepage Web UI
+
+    # ─── Network Configuration ─────────────────────────────────────────
+    # Uses bridge network to access all services
+    network_mode: bridge
+
+    # ─── Security Options ──────────────────────────────────────────────
+    security_opt:
+      - no-new-privileges:true
+
+    # ─── Resource Limits (Optional) ────────────────────────────────────
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 256M

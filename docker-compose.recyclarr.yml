@@ -1,0 +1,38 @@
+# ──────────────────────────────────────────────────────────────────────
+# ♻️ Recyclarr - TRaSH Guide Quality Profile Automation
+# ──────────────────────────────────────────────────────────────────────
+# Automatically syncs TRaSH Guide quality profiles to Sonarr/Radarr,
+# keeping your quality settings optimized without manual configuration.
+#
+# To enable: docker-compose -f docker-compose.yml -f docker-compose.recyclarr.yml up -d
+# To disable: Remove this file from the docker-compose command
+# ──────────────────────────────────────────────────────────────────────
+
+services:
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:latest
+    container_name: recyclarr
+    restart: unless-stopped
+
+    # ─── Environment Configuration ─────────────────────────────────────
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      # Run sync every 6 hours (can be customized)
+      - CRON_SCHEDULE=@daily
+
+    # ─── Persistent Storage ────────────────────────────────────────────
+    volumes:
+      - ./recyclarr:/config
+
+    # ─── Network Configuration ─────────────────────────────────────────
+    # Note: Recyclarr needs to communicate with Sonarr/Radarr directly
+    # It does NOT need to go through the VPN, so it uses the default network
+    network_mode: bridge
+
+    # ─── Resource Limits (Optional) ────────────────────────────────────
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 256M

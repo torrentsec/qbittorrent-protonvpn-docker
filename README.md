@@ -42,6 +42,11 @@ This project provides a **fully modular media automation stack** running securel
 - **Readarr** - Book and audiobook automation
 - **Bazarr** - Subtitle automation
 
+### Essential Services Pack (Recommended)
+- **Homepage** - Unified dashboard for all your services
+- **Recyclarr** - Automated TRaSH Guide quality profile sync
+- **Unpackerr** - Automatic archive extraction and cleanup
+
 ---
 
 ## ✅ Features
@@ -178,9 +183,9 @@ docker-compose -f docker-compose.yml \
 
 ## 🧩 Modular Service Selection
 
-Each Arr service is in its own compose file. Mix and match as needed:
+Each service is in its own compose file. Mix and match as needed:
 
-### Available Modules
+### Media Automation (Arr Stack)
 
 | Service | File | Description | Web UI |
 |---------|------|-------------|--------|
@@ -190,6 +195,14 @@ Each Arr service is in its own compose file. Mix and match as needed:
 | **Prowlarr** | `docker-compose.prowlarr.yml` | Indexer manager | `:9696` |
 | **Readarr** | `docker-compose.readarr.yml` | Book automation | `:8787` |
 | **Bazarr** | `docker-compose.bazarr.yml` | Subtitle automation | `:6767` |
+
+### Essential Services (Recommended)
+
+| Service | File | Description | Web UI |
+|---------|------|-------------|--------|
+| **Homepage** | `docker-compose.homepage.yml` | Unified dashboard | `:3000` |
+| **Recyclarr** | `docker-compose.recyclarr.yml` | TRaSH Guide sync | *N/A* |
+| **Unpackerr** | `docker-compose.unpackerr.yml` | Archive extraction | *N/A* |
 
 ### Custom Combinations
 
@@ -266,6 +279,7 @@ Once running, access your services at:
 | **Prowlarr** | http://localhost:9696 | *Set during first launch* |
 | **Readarr** | http://localhost:8787 | *Set during first launch* |
 | **Bazarr** | http://localhost:6767 | *Set during first launch* |
+| **Homepage** | http://localhost:3000 | No login required |
 
 ### First-Time qBittorrent Login
 
@@ -289,6 +303,9 @@ qbittorrent-protonvpn-docker/
 ├── docker-compose.prowlarr.yml     # Prowlarr module
 ├── docker-compose.readarr.yml      # Readarr module
 ├── docker-compose.bazarr.yml       # Bazarr module
+├── docker-compose.homepage.yml     # Homepage dashboard
+├── docker-compose.recyclarr.yml    # Recyclarr (TRaSH Guide)
+├── docker-compose.unpackerr.yml    # Unpackerr (archive extraction)
 ├── .env                            # Your credentials (gitignored)
 ├── .env.example                    # Template for .env
 ├── start-all.sh                    # Start all services
@@ -303,6 +320,9 @@ qbittorrent-protonvpn-docker/
 ├── prowlarr/                       # Prowlarr config (if enabled)
 ├── readarr/                        # Readarr config (if enabled)
 ├── bazarr/                         # Bazarr config (if enabled)
+├── homepage/                       # Homepage config (if enabled)
+├── recyclarr/                      # Recyclarr config (if enabled)
+├── unpackerr/                      # Unpackerr config (if enabled)
 ├── downloads/                      # Completed downloads
 ├── incomplete/                     # In-progress downloads
 └── media/
@@ -519,6 +539,133 @@ In each Arr service:
 
 ---
 
+### Setting Up Essential Services
+
+#### Homepage Dashboard
+
+1. Start Homepage:
+   ```bash
+   docker-compose -f docker-compose.yml -f docker-compose.homepage.yml up -d
+   ```
+
+2. Access at http://localhost:3000
+
+3. Configure your services:
+   - Edit `./homepage/services.yaml` to add your Arr services
+   - Example configuration:
+     ```yaml
+     - Media Automation:
+         - Sonarr:
+             href: http://localhost:8989
+             description: TV Series
+             widget:
+               type: sonarr
+               url: http://gluetun:8989
+               key: YOUR_SONARR_API_KEY
+         - Radarr:
+             href: http://localhost:7878
+             description: Movies
+             widget:
+               type: radarr
+               url: http://gluetun:7878
+               key: YOUR_RADARR_API_KEY
+     ```
+
+4. Customize widgets and bookmarks in `./homepage/widgets.yaml` and `./homepage/bookmarks.yaml`
+
+---
+
+#### Recyclarr - TRaSH Guide Automation
+
+1. Start Recyclarr:
+   ```bash
+   docker-compose -f docker-compose.yml -f docker-compose.recyclarr.yml up -d
+   ```
+
+2. Create initial configuration at `./recyclarr/recyclarr.yml`:
+   ```yaml
+   sonarr:
+     main:
+       base_url: http://gluetun:8989
+       api_key: YOUR_SONARR_API_KEY
+
+       quality_definition:
+         type: series
+
+       quality_profiles:
+         - name: HD-1080p
+           reset_unmatched_scores:
+             enabled: true
+           upgrade:
+             allowed: true
+             until_quality: Bluray-1080p
+             until_score: 10000
+           qualities:
+             - name: Bluray-1080p
+             - name: WEB 1080p
+               qualities:
+                 - WEBDL-1080p
+                 - WEBRip-1080p
+
+   radarr:
+     main:
+       base_url: http://gluetun:7878
+       api_key: YOUR_RADARR_API_KEY
+
+       quality_definition:
+         type: movie
+
+       quality_profiles:
+         - name: HD-1080p
+           reset_unmatched_scores:
+             enabled: true
+           upgrade:
+             allowed: true
+             until_quality: Bluray-1080p
+             until_score: 10000
+           qualities:
+             - name: Bluray-1080p
+             - name: WEB 1080p
+               qualities:
+                 - WEBDL-1080p
+                 - WEBRip-1080p
+   ```
+
+3. Runs daily automatically. To run manually:
+   ```bash
+   docker exec -it recyclarr recyclarr sync
+   ```
+
+---
+
+#### Unpackerr - Archive Extraction
+
+1. Get API keys from your Arr services:
+   - Open each Arr app (Sonarr, Radarr, etc.)
+   - Go to **Settings** → **General** → **Security**
+   - Copy the **API Key**
+
+2. Add API keys to `.env`:
+   ```bash
+   SONARR_API_KEY=your_sonarr_api_key_here
+   RADARR_API_KEY=your_radarr_api_key_here
+   LIDARR_API_KEY=your_lidarr_api_key_here
+   READARR_API_KEY=your_readarr_api_key_here
+   ```
+
+3. Start Unpackerr:
+   ```bash
+   docker-compose -f docker-compose.yml -f docker-compose.unpackerr.yml up -d
+   ```
+
+4. Unpackerr will now automatically:
+   - Monitor downloads folder
+   - Extract .rar, .zip, .7z archives
+   - Delete archives after successful extraction
+   - Notify Arr apps when extraction completes
+
+---
+
 ### Resource Management
 
 To limit container resources, uncomment the `deploy` sections in each compose file:
@@ -539,7 +686,8 @@ deploy:
 ```bash
 tar -czf backup-$(date +%Y%m%d).tar.gz \
   qbittorrent/ sonarr/ radarr/ lidarr/ \
-  prowlarr/ readarr/ bazarr/ gluetun/ .env
+  prowlarr/ readarr/ bazarr/ recyclarr/ \
+  unpackerr/ homepage/ gluetun/ .env
 ```
 
 **Restore:**

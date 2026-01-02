@@ -12,6 +12,9 @@ docker-compose \
   -f docker-compose.prowlarr.yml \
   -f docker-compose.readarr.yml \
   -f docker-compose.bazarr.yml \
+  -f docker-compose.homepage.yml \
+  -f docker-compose.recyclarr.yml \
+  -f docker-compose.unpackerr.yml \
   down
 
 echo "✅ All services stopped!"

@@ -1,33 +1,21 @@
 #!/bin/bash
 # ──────────────────────────────────────────────────────────────────────
-# 🚀 Start All Services (Base + Full Arr Stack + Essential Services)
+# 🚀 Start Base + Essential Services (No Arr Stack)
 # ──────────────────────────────────────────────────────────────────────
 
-echo "🚀 Starting all services..."
+echo "🚀 Starting base + essential services..."
 docker-compose \
   -f docker-compose.yml \
-  -f docker-compose.sonarr.yml \
-  -f docker-compose.radarr.yml \
-  -f docker-compose.lidarr.yml \
-  -f docker-compose.prowlarr.yml \
-  -f docker-compose.readarr.yml \
-  -f docker-compose.bazarr.yml \
   -f docker-compose.homepage.yml \
   -f docker-compose.recyclarr.yml \
   -f docker-compose.unpackerr.yml \
   up -d
 
-echo "✅ All services started!"
+echo "✅ Essential services started!"
 echo ""
 echo "📺 Access your services at:"
-echo "   - Homepage:    http://localhost:3000  ⭐ (Start here!)"
+echo "   - Homepage:    http://localhost:3000"
 echo "   - qBittorrent: http://localhost:8080"
-echo "   - Sonarr:      http://localhost:8989"
-echo "   - Radarr:      http://localhost:7878"
-echo "   - Lidarr:      http://localhost:8686"
-echo "   - Prowlarr:    http://localhost:9696"
-echo "   - Readarr:     http://localhost:8787"
-echo "   - Bazarr:      http://localhost:6767"
 echo ""
 echo "🔧 Background services running:"
 echo "   - Recyclarr:   Auto-syncing TRaSH Guide profiles"
