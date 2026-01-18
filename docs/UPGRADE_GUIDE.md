@@ -336,7 +336,7 @@ docker-compose up -d
 New setup requires additional resources:
 
 | Component | RAM | CPU | Disk |
-|-----------|-----|-----|------|
+| --------- | --- | --- | ---- |
 | Gluetun | ~50MB | <5% | <100MB |
 | qBittorrent | ~100MB | Varies | Varies |
 | Prometheus | ~200MB | <10% | ~1GB/month |
@@ -369,7 +369,7 @@ New setup requires additional resources:
 ## Feature Comparison
 
 | Feature | Before | After |
-|---------|--------|-------|
+| ------- | ------ | ----- |
 | Docker Compose Version | 3.x | 3.9 |
 | Network Segmentation | No | Yes (2 networks) |
 | Monitoring | No | Full stack |
@@ -396,7 +396,8 @@ If you encounter issues:
 After successful upgrade:
 
 1. ✅ Explore Grafana dashboards
-1. ✅ Setup regular backups: `crontab -e` → `0 2 * * * cd /path/to/project && make backup`
+1. ✅ Setup regular backups: `crontab -e` →
+   `0 2 * * * cd /path/to/project && make backup`
 1. ✅ Configure alerts in Prometheus
 1. ✅ Review security settings
 1. ✅ Star the repository if helpful!
