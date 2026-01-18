@@ -273,7 +273,7 @@ services:
 
       # ─── Special Modifications (Mods) ───
       # These add extra features to the container
-      - DOCKER_MODS=ghcr.io/gabe565/linuxserver-mod-vuetorrent|ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main
+      - DOCKER_MODS=ghcr.io/gabe565/linuxserver-mod-vuetorrent|ghcr.io/t-anc/gsp-qbittorrent-gluetun-sync-port-mod:main
       #   1. VueTorrent: Modern, beautiful web UI
       #   2. Port Sync Mod: Automatically updates qBittorrent when VPN port changes
 
