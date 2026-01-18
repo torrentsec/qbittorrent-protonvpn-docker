@@ -344,7 +344,7 @@ docker-compose up -d
 New setup requires additional resources:
 
 | Component | RAM | CPU | Disk |
-|-----------|-----|-----|------|
+| --------- | --- | --- | ---- |
 | Gluetun | ~50MB | <5% | <100MB |
 | qBittorrent | ~100MB | Varies | Varies |
 | Prometheus | ~200MB | <10% | ~1GB/month |
@@ -377,7 +377,7 @@ New setup requires additional resources:
 ## Feature Comparison
 
 | Feature | Before | After |
-|---------|--------|-------|
+| ------- | ------ | ----- |
 | Docker Compose Version | 3.x | 3.9 |
 | Network Segmentation | No | Yes (2 networks) |
 | Monitoring | No | Full stack |

@@ -24,8 +24,8 @@ This is a **complete infrastructure-as-code** solution featuring:
 
 1. [Features](#-features)
 1. [Quick Start](#-quick-start)
-1. [Architecture](#-architecture)
-1. [Prerequisites](#-prerequisites)
+1. [Architecture](#️-architecture)
+1. [Prerequisites](#️-prerequisites)
 1. [Installation](#-installation)
 1. [Operations](#-operations)
 1. [Monitoring](#-monitoring)
@@ -137,6 +137,7 @@ make up
 ```
 
 **Key Design Decisions:**
+
 - qBittorrent shares Gluetun's network namespace (zero-leak guarantee)
 - Separate monitoring network for observability isolation
 - Named volumes for persistent data

@@ -250,7 +250,7 @@ make status
 ## Quick Reference
 
 | Task | Command |
-|------|---------|
+| ---- | ------- |
 | Get qBittorrent password | `docker logs qbittorrent 2>&1 \| grep "temporary password"` |
 | Access Web UI | [http://localhost:8080](http://localhost:8080) |
 | Access Grafana | [http://localhost:3000](http://localhost:3000) |
