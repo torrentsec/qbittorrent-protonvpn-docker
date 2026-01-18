@@ -6,8 +6,7 @@ Accepted
 
 ## Context
 
-The qBittorrent + ProtonVPN infrastructure requires comprehensive
-monitoring and observability to ensure:
+The qBittorrent + ProtonVPN infrastructure requires comprehensive monitoring and observability to ensure:
 
 - VPN connection reliability
 - Container health and performance

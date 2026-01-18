@@ -154,8 +154,7 @@ make validate
 
 # Or manually:
 
-docker-compose config > /dev/null && \
-  echo "✓ Valid" || echo "✗ Invalid"
+docker-compose config > /dev/null && echo "✓ Valid" || echo "✗ Invalid"
 ```
 
 ### Step 6: Stop Old Setup
@@ -168,8 +167,7 @@ docker-compose down
 
 # Optional: Remove old networks
 
-docker network rm qbittorrent-protonvpn-docker_default \
-  2>/dev/null || true
+docker network rm qbittorrent-protonvpn-docker_default 2>/dev/null || true
 ```
 
 ### Step 7: Start New Setup
@@ -321,8 +319,7 @@ This is expected! qBittorrent should ONLY access internet through VPN.
 
 # Verify VPN routing
 
-docker exec qbittorrent curl -s \
-  https://ipinfo.io/json
+docker exec qbittorrent curl -s https://ipinfo.io/json
 
 # Should show ProtonVPN IP, not your real IP
 
@@ -375,8 +372,7 @@ cp backup_YYYYMMDD/.env .
 
 # Restore volumes (if needed)
 
-docker volume create \
-  qbittorrent-protonvpn-docker_gluetun-config
+docker volume create qbittorrent-protonvpn-docker_gluetun-config
 docker run --rm \
   -v qbittorrent-protonvpn-docker_gluetun-config:/target \
   -v $(pwd)/backup_YYYYMMDD:/backup \
@@ -453,8 +449,7 @@ If you encounter issues:
 After successful upgrade:
 
 1. ✅ Explore Grafana dashboards
-1. ✅ Setup regular backups: `crontab -e` →
-   `0 2 * * * cd /path/to/project && make backup`
+1. ✅ Setup regular backups: `crontab -e` → `0 2 * * * cd /path/to/project && make backup`
 1. ✅ Configure alerts in Prometheus
 1. ✅ Review security settings
 1. ✅ Star the repository if helpful!
