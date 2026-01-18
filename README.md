@@ -154,13 +154,15 @@ make up
 
 ### Required
 
-- **Docker Engine** 20.10.0+ ([Install Docker](https://docs.docker.com/get-docker/))
+- **Docker Engine** 20.10.0+
+  ([Install Docker](https://docs.docker.com/get-docker/))
 - **Docker Compose** 2.0.0+ (bundled with Docker Desktop)
 - **ProtonVPN Account** (Plus/Unlimited for WireGuard + port forwarding)
 
 ### Optional
 
-- **Make** (pre-installed on macOS/Linux, [install on Windows](https://gnuwin32.sourceforge.net/packages/make.htm))
+- **Make** (pre-installed on macOS/Linux,
+  [install on Windows](https://gnuwin32.sourceforge.net/packages/make.htm))
 - **Pre-commit** (`pip install pre-commit`) for development
 - **Git** for version control
 
@@ -205,7 +207,8 @@ nano .env  # or use your preferred editor
 
 ```ini
 
-# ProtonVPN WireGuard private key (get from https://account.protonvpn.com/downloads)
+# ProtonVPN WireGuard private key
+# (get from https://account.protonvpn.com/downloads)
 
 WIREGUARD_PRIVATE_KEY=your_private_key_here
 
@@ -386,7 +389,8 @@ Real-time container resource usage and performance metrics.
 
 This setup provides **multiple layers** of leak prevention:
 
-1. **Network Namespace Sharing**: qBittorrent shares Gluetun's network, physically preventing direct internet access
+1. **Network Namespace Sharing**: qBittorrent shares Gluetun's network,
+   physically preventing direct internet access
 1. **Firewall Rules**: Gluetun's built-in firewall blocks non-VPN traffic
 1. **IPv6 Disabled**: Prevents IPv6 leaks
 1. **DNS over TLS**: Encrypted DNS queries via Cloudflare
