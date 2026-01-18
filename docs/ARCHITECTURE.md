@@ -6,7 +6,7 @@ This document describes the architecture of the qBittorrent + ProtonVPN Docker i
 
 ## System Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Docker Host                               │
 │                                                                   │
@@ -110,7 +110,7 @@ This document describes the architecture of the qBittorrent + ProtonVPN Docker i
 
 ### Network Segmentation
 
-```
+```text
 VPN Network (172.20.0.0/16)
 ├── Gluetun (172.20.0.10)
 └── qBittorrent (shares Gluetun network namespace)
@@ -174,7 +174,7 @@ Monitoring Network (172.21.0.0/16)
 
 ### Persistent Storage
 
-```
+```text
 Named Volumes:
 ├── gluetun-config         (VPN configurations)
 ├── qbittorrent-config     (qBittorrent settings)
@@ -202,7 +202,7 @@ Bind Mounts:
 
 ### Infrastructure as Code
 
-```
+```text
 Project Structure:
 ├── docker-compose.yml          (Service definitions)
 ├── Makefile                    (Operations automation)

@@ -66,6 +66,7 @@ services: [all services with full config]
 ```
 
 ### Operations (Makefile)
+
 ```makefile
 make init      # Initialize project
 make up        # Start services
@@ -77,7 +78,8 @@ make monitoring # Open dashboards
 ```
 
 ### Automation (scripts/)
-```
+
+```text
 scripts/
 ├── backup.sh   # Backup procedure
 └── restore.sh  # Restore procedure
@@ -152,7 +154,7 @@ scripts/
 
 ## File Structure
 
-```
+```text
 qbittorrent-protonvpn-docker/
 ├── docker-compose.yml          # Service definitions
 ├── Makefile                    # Operations automation

@@ -20,15 +20,15 @@ docker logs qbittorrent 2>&1 | grep -oP '(?<=password is: ).*'
 
 ### Login
 
-1. Open http://localhost:8080
-2. Username: `admin`
-3. Password: `[temporary password from above]`
+1. Open <http://localhost:8080>
+1. Username: `admin`
+1. Password: `[temporary password from above]`
 
 ### ⚠️ CRITICAL: Set Permanent Password
 
 1. Go to **Tools** → **Options** → **Web UI**
-2. Set a new password under "Authentication"
-3. Click **Save**
+1. Set a new password under "Authentication"
+1. Click **Save**
 
 **If you skip this:** You'll need to retrieve the temp password after every container restart!
 
@@ -37,10 +37,10 @@ docker logs qbittorrent 2>&1 | grep -oP '(?<=password is: ).*'
 For automatic port forwarding to work, you MUST enable localhost bypass:
 
 1. **Tools** → **Options** → **Web UI**
-2. Scroll to "**Security**" section
-3. ✅ **Enable** "Bypass authentication for clients on localhost"
-4. Click **Save**
-5. Restart qBittorrent: `docker restart qbittorrent`
+1. Scroll to "**Security**" section
+1. ✅ **Enable** "Bypass authentication for clients on localhost"
+1. Click **Save**
+1. Restart qBittorrent: `docker restart qbittorrent`
 
 **Without this:** Port sync mod will fail with authentication errors!
 
@@ -64,13 +64,14 @@ Restart: `make restart`
 
 ```bash
 docker inspect gluetun | grep IPAddress
-# Access via: http://[IP]:8080
+# Access via: <http://[IP]:8080>
 ```
 
 ### Port Sync Errors
 
 **Error:**
-```
+
+```text
 [GSP] - [ERROR] The "Bypass authentication for clients on localhost" setting is not set.
 ```
 
@@ -108,7 +109,7 @@ docker logs qbittorrent | grep GSP | tail -10
 | Action | Command |
 |--------|---------|
 | Get temp password | `docker logs qbittorrent 2>&1 \| grep "temporary password"` |
-| Access Web UI | http://localhost:8080 |
+| Access Web UI | <http://localhost:8080> |
 | Restart qBittorrent | `docker restart qbittorrent` |
 | View logs | `docker logs qbittorrent` |
 | Edit config | `docker exec -it qbittorrent nano /config/qBittorrent/qBittorrent.conf` |
