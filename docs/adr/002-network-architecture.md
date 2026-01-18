@@ -21,7 +21,8 @@ Implement two separate Docker bridge networks:
 1. **VPN Network** (172.20.0.0/16) - For VPN and torrent traffic
 1. **Monitoring Network** (172.21.0.0/16) - For observability stack
 
-qBittorrent uses `network_mode: service:gluetun` to share Gluetun's network namespace.
+qBittorrent uses `network_mode: service:gluetun` to share Gluetun's
+network namespace.
 
 ## Rationale
 
@@ -162,7 +163,8 @@ networks:
 ### Service Assignment
 
 - **VPN Network**: Gluetun (with qBittorrent sharing)
-- **Monitoring Network**: Prometheus, Grafana, Loki, Promtail, cAdvisor, Watchtower
+- **Monitoring Network**: Prometheus, Grafana, Loki, Promtail, cAdvisor,
+  Watchtower
 - **Both Networks**: Gluetun (bridge between networks)
 
 ## Migration Path
@@ -178,5 +180,7 @@ For users upgrading from previous versions:
 ## References
 
 - [Docker Networking Overview](https://docs.docker.com/network/)
-- [Gluetun Wiki - Network Mode](https://github.com/qdm12/gluetun/wiki/Container-network-namespace)
-- [Container Network Security](https://docs.docker.com/engine/security/security/)
+- [Gluetun Wiki - Network Mode]
+  (https://github.com/qdm12/gluetun/wiki/Container-network-namespace)
+- [Container Network Security]
+  (https://docs.docker.com/engine/security/security/)

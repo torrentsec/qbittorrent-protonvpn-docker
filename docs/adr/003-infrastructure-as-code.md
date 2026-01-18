@@ -286,4 +286,5 @@ For existing users:
 - [Docker Compose File Reference](https://docs.docker.com/compose/compose-file/)
 - [GNU Make Manual](https://www.gnu.org/software/make/manual/)
 - [Pre-commit Framework](https://pre-commit.com/)
-- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [GitHub Actions Documentation]
+  (https://docs.github.com/en/actions)

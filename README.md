@@ -3,7 +3,9 @@
 [![CI/CD](https://github.com/torrentsec/qbittorrent-protonvpn-docker/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/torrentsec/qbittorrent-protonvpn-docker/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Production-grade infrastructure for running qBittorrent securely through ProtonVPN with comprehensive monitoring, automated operations, and enterprise-level best practices.**
+**Production-grade infrastructure for running qBittorrent securely through
+ProtonVPN with comprehensive monitoring, automated operations, and
+enterprise-level best practices.**
 
 ## 🌟 Highlights
 
@@ -328,10 +330,12 @@ Access Grafana at <http://localhost:3000>
 **Default credentials**: admin / admin (change on first login)
 
 **Pre-configured datasources:**
+
 - Prometheus (metrics)
 - Loki (logs)
 
 **Recommended dashboards to import:**
+
 - Docker Container Monitoring: ID 893
 - cAdvisor Exporter: ID 14282
 - Loki Dashboard: ID 13639
@@ -341,12 +345,14 @@ Access Grafana at <http://localhost:3000>
 Access Prometheus at <http://localhost:9090>
 
 **Available metrics:**
+
 - Container CPU/Memory/Network usage
 - VPN connection status
 - Disk I/O and space usage
 - Service health checks
 
 **Pre-configured alerts:**
+
 - VPN connection down
 - Container failures
 - High resource usage
@@ -479,8 +485,10 @@ make status
 ```
 
 **To reduce resource usage:**
+
 - Disable monitoring stack (comment out in docker-compose.yml)
-- Reduce Prometheus retention (edit monitoring/prometheus/prometheus.yml)
+- Reduce Prometheus retention
+  (edit monitoring/prometheus/prometheus.yml)
 - Limit container resources (add `deploy.resources.limits`)
 
 ### Container Won't Start
@@ -544,7 +552,8 @@ Edit `monitoring/prometheus/alerts.yml`:
 ```yaml
 
 - alert: HighDownloadSpeed
-  expr: rate(container_network_receive_bytes_total{name="qbittorrent"}[5m]) > 100000000
+  expr: rate(container_network_receive_bytes_total
+    {name="qbittorrent"}[5m]) > 100000000
   for: 5m
   labels:
     severity: info
@@ -600,9 +609,12 @@ networks:
 
 ### Available Documentation
 
-- **[Architecture](docs/ARCHITECTURE.md)** - System design and components
-- **[Upgrade Guide](docs/UPGRADE_GUIDE.md)** - Migration from previous versions
-- **[ADR 001](docs/adr/001-monitoring-stack.md)** - Monitoring stack decisions
+- **[Architecture](docs/ARCHITECTURE.md)** - System design and
+  components
+- **[Upgrade Guide](docs/UPGRADE_GUIDE.md)** - Migration from previous
+  versions
+- **[ADR 001](docs/adr/001-monitoring-stack.md)** - Monitoring stack
+  decisions
 - **[ADR 002](docs/adr/002-network-architecture.md)** - Network design
 - **[ADR 003](docs/adr/003-infrastructure-as-code.md)** - IaC approach
 

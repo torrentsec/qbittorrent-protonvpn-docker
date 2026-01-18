@@ -2,7 +2,8 @@
 
 ## Overview
 
-This guide helps you upgrade from the basic setup to the advanced infrastructure implementation.
+This guide helps you upgrade from the basic setup to the advanced
+infrastructure implementation.
 
 ## What's New
 
@@ -46,6 +47,7 @@ Before upgrading:
 - At least 5GB free disk space
 
 Check your versions:
+
 ```bash
 docker --version
 docker-compose --version
@@ -73,12 +75,14 @@ cp -r qbittorrent backup_$(date +%Y%m%d)/ 2>/dev/null || true
 docker run --rm \
   -v qbittorrent-protonvpn-docker_gluetun-config:/source \
   -v $(pwd)/backup_$(date +%Y%m%d):/backup \
-  alpine tar czf /backup/gluetun-volume.tar.gz -C /source .
+  alpine tar czf /backup/gluetun-volume.tar.gz \
+    -C /source .
 
 docker run --rm \
   -v qbittorrent-protonvpn-docker_qbittorrent-config:/source \
   -v $(pwd)/backup_$(date +%Y%m%d):/backup \
-  alpine tar czf /backup/qbittorrent-volume.tar.gz -C /source .
+  alpine tar czf /backup/qbittorrent-volume.tar.gz \
+    -C /source .
 
 echo "Backup complete in backup_$(date +%Y%m%d)/"
 ```
@@ -131,7 +135,8 @@ VPN_FORWARDED_PORT=0
 ### Step 4: Create Required Directories
 
 ```bash
-mkdir -p monitoring/{prometheus,grafana/{provisioning/{datasources,dashboards},dashboards},loki,promtail}
+mkdir -p monitoring/{prometheus,grafana/{provisioning/\
+{datasources,dashboards},dashboards},loki,promtail}
 mkdir -p scripts downloads incomplete
 ```
 
@@ -371,7 +376,8 @@ docker volume create qbittorrent-protonvpn-docker_gluetun-config
 docker run --rm \
   -v qbittorrent-protonvpn-docker_gluetun-config:/target \
   -v $(pwd)/backup_YYYYMMDD:/backup \
-  alpine tar xzf /backup/gluetun-volume.tar.gz -C /target
+  alpine tar xzf /backup/gluetun-volume.tar.gz \
+    -C /target
 
 # Start old setup
 

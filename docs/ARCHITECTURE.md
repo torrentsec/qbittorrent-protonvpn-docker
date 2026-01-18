@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document describes the architecture of the qBittorrent + ProtonVPN Docker infrastructure.
+This document describes the architecture of the qBittorrent + ProtonVPN
+Docker infrastructure.
 
 ## System Architecture
 
