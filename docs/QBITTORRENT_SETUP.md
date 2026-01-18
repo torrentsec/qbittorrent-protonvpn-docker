@@ -30,7 +30,8 @@ docker logs qbittorrent 2>&1 | grep -oP '(?<=password is: ).*'
 1. Set a new password under "Authentication"
 1. Click **Save**
 
-**If you skip this:** You'll need to retrieve the temp password after every container restart!
+**If you skip this:** You'll need to retrieve the temp password after
+every container restart!
 
 ## 🔧 Enable Port Sync (Required!)
 
@@ -74,7 +75,8 @@ docker inspect gluetun | grep IPAddress
 **Error:**
 
 ```text
-[GSP] - [ERROR] The "Bypass authentication for clients on localhost" setting is not set.
+[GSP] - [ERROR] The "Bypass authentication for clients on
+localhost" setting is not set.
 ```
 
 **Fix:**
