@@ -14,7 +14,8 @@ This is a **complete infrastructure-as-code** solution featuring:
 - 🔒 **Zero-leak VPN enforcement** - qBittorrent physically cannot bypass VPN
 - 📊 **Full observability stack** - Prometheus, Grafana, Loki monitoring
 - 🤖 **Automated operations** - Makefile, backup/restore, CI/CD
-- 🏗️ **Production-ready** - Security hardening, health checks, network segmentation
+- 🏗️ **Production-ready** - Security hardening, health checks, network
+  segmentation
 - 📚 **Comprehensive docs** - Architecture diagrams, ADRs, upgrade guides
 
 ---
@@ -146,7 +147,8 @@ make up
 - Named volumes for persistent data
 - Security-first approach with minimal privileges
 
-📚 **Detailed documentation**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+📚 **Detailed documentation**: See
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ---
 
@@ -666,7 +668,8 @@ pre-commit run --all-files
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see the
+[LICENSE](LICENSE) file for details.
 
 ---
 
@@ -681,8 +684,10 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 💬 Support & Community
 
-- 🐛 **Issues**: [GitHub Issues](https://github.com/torrentsec/qbittorrent-protonvpn-docker/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/torrentsec/qbittorrent-protonvpn-docker/discussions)
+- 🐛 **Issues**:
+  [GitHub Issues](https://github.com/torrentsec/qbittorrent-protonvpn-docker/issues)
+- 💬 **Discussions**:
+  [GitHub Discussions](https://github.com/torrentsec/qbittorrent-protonvpn-docker/discussions)
 - ⭐ **Star** this repo if you find it helpful!
 - 🍴 **Fork** to customize for your needs
 
