@@ -30,8 +30,7 @@ docker logs qbittorrent 2>&1 | grep -oP '(?<=password is: ).*'
 1. Set a new password under "Authentication"
 1. Click **Save**
 
-**If you skip this:** You'll need to retrieve the temp password after
-every container restart!
+**If you skip this:** You'll need to retrieve the temp password after every container restart!
 
 ## 🔧 Enable Port Sync (Required!)
 

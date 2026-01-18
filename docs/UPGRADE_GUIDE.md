@@ -138,7 +138,9 @@ make help
 make validate
 
 # Or manually:
-docker-compose config > /dev/null && echo "✓ Valid" || echo "✗ Invalid"
+
+docker-compose config > /dev/null && \
+  echo "✓ Valid" || echo "✗ Invalid"
 ```
 
 ### Step 6: Stop Old Setup
@@ -148,7 +150,9 @@ docker-compose config > /dev/null && echo "✓ Valid" || echo "✗ Invalid"
 docker-compose down
 
 # Optional: Remove old networks
-docker network rm qbittorrent-protonvpn-docker_default 2>/dev/null || true
+
+docker network rm qbittorrent-protonvpn-docker_default \
+  2>/dev/null || true
 ```
 
 ### Step 7: Start New Setup
@@ -272,7 +276,9 @@ This is expected! qBittorrent should ONLY access internet through VPN.
 
 ```bash
 # Verify VPN routing
-docker exec qbittorrent curl -s https://ipinfo.io/json
+
+docker exec qbittorrent curl -s \
+  https://ipinfo.io/json
 
 # Should show ProtonVPN IP, not your real IP
 ```
@@ -319,7 +325,9 @@ cp backup_YYYYMMDD/docker-compose.yml .
 cp backup_YYYYMMDD/.env .
 
 # Restore volumes (if needed)
-docker volume create qbittorrent-protonvpn-docker_gluetun-config
+
+docker volume create \
+  qbittorrent-protonvpn-docker_gluetun-config
 docker run --rm \
   -v qbittorrent-protonvpn-docker_gluetun-config:/target \
   -v $(pwd)/backup_YYYYMMDD:/backup \
