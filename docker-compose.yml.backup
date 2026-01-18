@@ -1,0 +1,383 @@
+# ──────────────────────────────────────────────────────────────────────
+# 📌 Docker Compose Configuration for Secure qBittorrent with VPN
+# ──────────────────────────────────────────────────────────────────────
+# ✅ Production-grade infrastructure as code setup
+# ✅ Full observability with monitoring and logging
+# ✅ Network segmentation and security hardening
+# ✅ Automated health checks and service dependencies
+# ──────────────────────────────────────────────────────────────────────
+
+version: '3.9'
+
+# ──────────────────────────────────────────────────────────────────────
+# 🌐 NETWORKS - Proper network segmentation for security
+# ──────────────────────────────────────────────────────────────────────
+networks:
+  vpn_network:
+    driver: bridge
+    internal: false
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+    driver_opts:
+      com.docker.network.bridge.name: br-vpn
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+
+  monitoring_network:
+    driver: bridge
+    internal: false
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/16
+
+# ──────────────────────────────────────────────────────────────────────
+# 💾 VOLUMES - Named volumes for better management
+# ──────────────────────────────────────────────────────────────────────
+volumes:
+  gluetun-config:
+    driver: local
+  qbittorrent-config:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  loki-data:
+    driver: local
+
+# ──────────────────────────────────────────────────────────────────────
+# 🐳 SERVICES
+# ──────────────────────────────────────────────────────────────────────
+services:
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 🛡️ VPN CONTAINER (Gluetun) - Provides secure ProtonVPN connection
+  # ──────────────────────────────────────────────────────────────────────
+  gluetun:
+    image: ghcr.io/qdm12/gluetun:v3.39.1
+    container_name: gluetun
+    hostname: gluetun
+    restart: unless-stopped
+
+    networks:
+      vpn_network:
+        ipv4_address: 172.20.0.10
+      monitoring_network:
+
+    cap_add:
+      - NET_ADMIN
+
+    cap_drop:
+      - ALL
+
+    devices:
+      - /dev/net/tun:/dev/net/tun
+
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
+      - net.ipv4.conf.all.src_valid_mark=1
+
+    security_opt:
+      - no-new-privileges:true
+
+    environment:
+      # VPN Configuration
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - SERVER_COUNTRIES=${SERVER_COUNTRIES:-Netherlands}
+      - SERVER_CITIES=${SERVER_CITIES}
+      - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_LISTENING_PORT=${VPN_FORWARDED_PORT:-0}
+
+      # Security & Performance
+      - FIREWALL_OUTBOUND_SUBNETS=172.20.0.0/16,172.21.0.0/16
+      - FIREWALL_VPN_INPUT_PORTS=${VPN_FORWARDED_PORT:-0}
+      - DOT=on
+      - DOT_PROVIDERS=cloudflare
+      - BLOCK_MALICIOUS=on
+      - BLOCK_SURVEILLANCE=on
+
+      # Timezone & Logging
+      - TZ=${TZ:-UTC}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - HEALTH_VPN_DURATION_INITIAL=30s
+      - HEALTH_SUCCESS_WAIT_DURATION=10s
+
+    volumes:
+      - gluetun-config:/gluetun
+
+    ports:
+      - "8080:8080"    # qBittorrent Web UI
+      - "8000:8000"    # Gluetun HTTP control server
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "--timeout=3", "--tries=1", "https://www.google.com"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "logging=promtail"
+      - "logging_jobname=gluetun"
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 📂 TORRENT CLIENT (qBittorrent) - Secure torrenting through VPN
+  # ──────────────────────────────────────────────────────────────────────
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:4.6.7
+    container_name: qbittorrent
+    hostname: qbittorrent
+    restart: unless-stopped
+
+    network_mode: "service:gluetun"
+
+    depends_on:
+      gluetun:
+        condition: service_healthy
+
+    security_opt:
+      - no-new-privileges:true
+
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-UTC}
+      - WEBUI_PORT=8080
+      - TORRENTING_PORT=${VPN_FORWARDED_PORT:-6881}
+
+      # Docker Mods for port sync
+      - DOCKER_MODS=ghcr.io/gabe565/linuxserver-mod-vuetorrent|ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main
+      - GSP_GTN_API_KEY=${GSP_GTN_API_KEY}
+      - GSP_QBITTORRENT_PORT=${VPN_FORWARDED_PORT:-6881}
+      - GSP_MINIMAL_LOGS=false
+
+    volumes:
+      - qbittorrent-config:/config
+      - ${DOWNLOADS_PATH:-./downloads}:/downloads
+      - ${INCOMPLETE_PATH:-./incomplete}:/incomplete
+
+    ulimits:
+      nofile:
+        soft: 32768
+        hard: 65536
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+      - "logging=promtail"
+      - "logging_jobname=qbittorrent"
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 📊 MONITORING - Prometheus for metrics collection
+  # ──────────────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: prometheus
+    hostname: prometheus
+    restart: unless-stopped
+
+    networks:
+      - monitoring_network
+
+    security_opt:
+      - no-new-privileges:true
+
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+
+    ports:
+      - "9090:9090"
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 📈 VISUALIZATION - Grafana for dashboards
+  # ──────────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:11.3.1
+    container_name: grafana
+    hostname: grafana
+    restart: unless-stopped
+
+    networks:
+      - monitoring_network
+
+    security_opt:
+      - no-new-privileges:true
+
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-clock-panel
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - prometheus
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 🐳 DOCKER METRICS - cAdvisor for container metrics
+  # ──────────────────────────────────────────────────────────────────────
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.50.0
+    container_name: cadvisor
+    hostname: cadvisor
+    restart: unless-stopped
+
+    networks:
+      - monitoring_network
+
+    privileged: true
+
+    devices:
+      - /dev/kmsg
+
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+
+    ports:
+      - "8081:8080"
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 📝 LOGGING - Loki for log aggregation
+  # ──────────────────────────────────────────────────────────────────────
+  loki:
+    image: grafana/loki:3.2.1
+    container_name: loki
+    hostname: loki
+    restart: unless-stopped
+
+    networks:
+      - monitoring_network
+
+    security_opt:
+      - no-new-privileges:true
+
+    command: -config.file=/etc/loki/loki-config.yml
+
+    volumes:
+      - ./monitoring/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+
+    ports:
+      - "3100:3100"
+
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3100/ready"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 📤 LOG SHIPPING - Promtail for log collection
+  # ──────────────────────────────────────────────────────────────────────
+  promtail:
+    image: grafana/promtail:3.2.1
+    container_name: promtail
+    hostname: promtail
+    restart: unless-stopped
+
+    networks:
+      - monitoring_network
+
+    security_opt:
+      - no-new-privileges:true
+
+    command: -config.file=/etc/promtail/promtail-config.yml
+
+    volumes:
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    depends_on:
+      - loki
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  # ──────────────────────────────────────────────────────────────────────
+  # 🔄 WATCHTOWER - Automatic container updates
+  # ──────────────────────────────────────────────────────────────────────
+  watchtower:
+    image: containrrr/watchtower:1.7.1
+    container_name: watchtower
+    hostname: watchtower
+    restart: unless-stopped
+
+    networks:
+      - monitoring_network
+
+    security_opt:
+      - no-new-privileges:true
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=86400
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+      - WATCHTOWER_ROLLING_RESTART=true
+      - WATCHTOWER_TIMEOUT=30s
+      - TZ=${TZ:-UTC}
+
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
