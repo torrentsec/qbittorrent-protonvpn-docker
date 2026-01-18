@@ -14,7 +14,8 @@ This is a **complete infrastructure-as-code** solution featuring:
 - 🔒 **Zero-leak VPN enforcement** - qBittorrent physically cannot bypass VPN
 - 📊 **Full observability stack** - Prometheus, Grafana, Loki monitoring
 - 🤖 **Automated operations** - Makefile, backup/restore, CI/CD
-- 🏗️ **Production-ready** - Security hardening, health checks, network segmentation
+- 🏗️ **Production-ready** - Security hardening, health checks, network
+  segmentation
 - 📚 **Comprehensive docs** - Architecture diagrams, ADRs, upgrade guides
 
 ---
@@ -141,7 +142,8 @@ make up
 - Named volumes for persistent data
 - Security-first approach with minimal privileges
 
-**Detailed documentation**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+📚 **Detailed documentation**: See
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ---
 
@@ -149,13 +151,15 @@ make up
 
 ### Required
 
-- **Docker Engine** 20.10.0+ ([Install Docker](https://docs.docker.com/get-docker/))
+- **Docker Engine** 20.10.0+
+  ([Install Docker](https://docs.docker.com/get-docker/))
 - **Docker Compose** 2.0.0+ (bundled with Docker Desktop)
 - **ProtonVPN Account** (Plus/Unlimited for WireGuard + port forwarding)
 
 ### Optional
 
-- **Make** (pre-installed on macOS/Linux, [install on Windows](https://gnuwin32.sourceforge.net/packages/make.htm))
+- **Make** (pre-installed on macOS/Linux,
+  [install on Windows](https://gnuwin32.sourceforge.net/packages/make.htm))
 - **Pre-commit** (`pip install pre-commit`) for development
 - **Git** for version control
 
@@ -199,8 +203,10 @@ nano .env  # or use your preferred editor
 **Essential variables:**
 
 ```ini
+
 # ProtonVPN WireGuard private key
 # (get from https://account.protonvpn.com/downloads)
+
 WIREGUARD_PRIVATE_KEY=your_private_key_here
 
 # VPN server location
@@ -378,7 +384,8 @@ Real-time container resource usage and performance metrics.
 
 This setup provides **multiple layers** of leak prevention:
 
-1. **Network Namespace Sharing**: qBittorrent shares Gluetun's network, physically preventing direct internet access
+1. **Network Namespace Sharing**: qBittorrent shares Gluetun's network,
+   physically preventing direct internet access
 1. **Firewall Rules**: Gluetun's built-in firewall blocks non-VPN traffic
 1. **IPv6 Disabled**: Prevents IPv6 leaks
 1. **DNS over TLS**: Encrypted DNS queries via Cloudflare
@@ -623,7 +630,8 @@ pre-commit run --all-files
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see the
+[LICENSE](LICENSE) file for details.
 
 ---
 
@@ -638,8 +646,10 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 💬 Support & Community
 
-- 🐛 **Issues**: [GitHub Issues](https://github.com/torrentsec/qbittorrent-protonvpn-docker/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/torrentsec/qbittorrent-protonvpn-docker/discussions)
+- 🐛 **Issues**:
+  [GitHub Issues](https://github.com/torrentsec/qbittorrent-protonvpn-docker/issues)
+- 💬 **Discussions**:
+  [GitHub Discussions](https://github.com/torrentsec/qbittorrent-protonvpn-docker/discussions)
 - ⭐ **Star** this repo if you find it helpful!
 - 🍴 **Fork** to customize for your needs
 
