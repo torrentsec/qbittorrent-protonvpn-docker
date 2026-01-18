@@ -93,10 +93,10 @@ make up
 
 ### Access Services
 
-- **qBittorrent Web UI**: http://localhost:8080
-- **Grafana Dashboard**: http://localhost:3000 (admin/admin)
-- **Prometheus**: http://localhost:9090
-- **cAdvisor**: http://localhost:8081
+- **qBittorrent Web UI**: <http://localhost:8080>
+- **Grafana Dashboard**: <http://localhost:3000> (admin/admin)
+- **Prometheus**: <http://localhost:9090>
+- **cAdvisor**: <http://localhost:8081>
 
 ---
 
@@ -301,7 +301,7 @@ make help          # Show all available commands
 
 ### Grafana Dashboards
 
-Access Grafana at **http://localhost:3000**
+Access Grafana at <http://localhost:3000>
 
 **Default credentials**: admin / admin (change on first login)
 
@@ -316,7 +316,7 @@ Access Grafana at **http://localhost:3000**
 
 ### Prometheus Metrics
 
-Access Prometheus at **http://localhost:9090**
+Access Prometheus at <http://localhost:9090>
 
 **Available metrics:**
 - Container CPU/Memory/Network usage
@@ -346,7 +346,7 @@ Access Prometheus at **http://localhost:9090**
 
 ### cAdvisor
 
-Access cAdvisor at **http://localhost:8081**
+Access cAdvisor at <http://localhost:8081>
 
 Real-time container resource usage and performance metrics.
 
@@ -439,8 +439,8 @@ docker logs gluetun | grep "port forward"
 # Check resource usage
 make status
 
-# View detailed metrics
-# Open http://localhost:8081 (cAdvisor)
+# View detailed metrics at cAdvisor
+# Open <http://localhost:8081>
 ```
 
 **To reduce resource usage:**

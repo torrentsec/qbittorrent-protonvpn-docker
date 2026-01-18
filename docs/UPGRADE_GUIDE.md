@@ -171,18 +171,19 @@ make test-qbittorrent
 ### Step 9: Access New Monitoring
 
 Open in your browser:
-- **qBittorrent**: http://localhost:8080
-- **Grafana**: http://localhost:3000 (admin/your_password)
-- **Prometheus**: http://localhost:9090
-- **cAdvisor**: http://localhost:8081
+
+- **qBittorrent**: <http://localhost:8080>
+- **Grafana**: <http://localhost:3000> (admin/your_password)
+- **Prometheus**: <http://localhost:9090>
+- **cAdvisor**: <http://localhost:8081>
 
 ## Post-Upgrade Configuration
 
 ### 1. Configure Grafana Dashboards
 
-1. Login to Grafana (http://localhost:3000)
-2. Go to Dashboards → Browse
-3. Import community dashboards:
+1. Login to Grafana (<http://localhost:3000>)
+1. Go to Dashboards → Browse
+1. Import community dashboards:
    - Docker monitoring: Dashboard ID 893
    - cAdvisor: Dashboard ID 14282
 
