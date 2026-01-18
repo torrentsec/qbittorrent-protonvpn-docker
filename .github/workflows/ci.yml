@@ -27,7 +27,7 @@ jobs:
 
       - name: Validate docker-compose.yml
         run: |
-          docker-compose config > /dev/null
+          docker compose config > /dev/null
           echo "✓ docker-compose.yml is valid"
 
       - name: Check for required files
@@ -128,10 +128,10 @@ jobs:
           EOF
 
       - name: Validate docker-compose with test env
-        run: docker-compose config > /dev/null
+        run: docker compose config > /dev/null
 
       - name: Check Docker Compose syntax
-        run: docker-compose config --quiet
+        run: docker compose config --quiet
 
   # ──────────────────────────────────────────────────────────────────
   # 📝 Linting Job
