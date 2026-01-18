@@ -4,7 +4,7 @@
 
 ### Getting Your Initial Password
 
-qBittorrent generates a temporary admin password on first startup. 
+qBittorrent generates a temporary admin password on first startup.
 
 **Retrieve it with:**
 
@@ -64,7 +64,9 @@ Restart: `make restart`
 
 ```bash
 docker inspect gluetun | grep IPAddress
+
 # Access via: <http://[IP]:8080>
+
 ```
 
 ### Port Sync Errors
@@ -87,20 +89,26 @@ Try these in order:
 ```bash
 ./qbittorrent/qBittorrent/qBittorrent.conf
 ./qbittorrent/config/qBittorrent.conf
+
 # Or edit inside container:
+
 docker exec -it qbittorrent nano /config/qBittorrent/qBittorrent.conf
 ```
 
 ## ✅ Verification
 
 ```bash
+
 # Check VPN
+
 make test-vpn
 
 # Check port forwarding
+
 docker logs gluetun | grep "port forward"
 
 # Check sync mod
+
 docker logs qbittorrent | grep GSP | tail -10
 ```
 

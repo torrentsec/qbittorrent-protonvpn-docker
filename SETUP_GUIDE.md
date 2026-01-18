@@ -96,11 +96,14 @@ The port sync mod runs on localhost and needs to communicate with qBittorrent's 
 **Solution 2 - Access via Container IP:**
 
 ```bash
+
 # Get qBittorrent IP (it shares Gluetun's network)
+
 docker inspect gluetun | grep IPAddress
 
 # Access using that IP
 # Example: <http://172.20.0.10:8080>
+
 ```
 
 ### ❌ Issue: Port Sync Mod Errors
@@ -183,13 +186,17 @@ curl: (22) The requested URL returned error: 403
 Try these locations in order:
 
 ```bash
+
 # Location 1 (most common)
+
 ls -la ./qbittorrent/qBittorrent/qBittorrent.conf
 
 # Location 2
+
 ls -la ./qbittorrent/config/qBittorrent.conf
 
 # Location 3 (inside Docker volume)
+
 docker exec qbittorrent cat /config/qBittorrent/qBittorrent.conf
 ```
 
@@ -204,25 +211,32 @@ docker exec -it qbittorrent nano /config/qBittorrent/qBittorrent.conf
 Run these commands to check:
 
 ```bash
+
 # 1. Check VPN is connected
+
 make test-vpn
 
 # 2. Check qBittorrent is using VPN
+
 make test-qbittorrent
 
 # 3. Check port forwarding
+
 docker logs gluetun | grep "port forward" | tail -1
 
 # 4. Check port sync is working
+
 docker logs qbittorrent | grep GSP | tail -10
 
 # 5. View all service status
+
 make status
 ```
 
 ## Best Practices
 
 ### Security Checklist
+
 - [ ] Changed default Grafana password
 - [ ] Set permanent qBittorrent password
 - [ ] Enabled localhost bypass for port sync
@@ -230,12 +244,14 @@ make status
 - [ ] Tested IP leak protection
 
 ### Backup Checklist
+
 - [ ] Created initial backup: `make backup`
 - [ ] Stored backup in safe location
 - [ ] Tested restore procedure: `make restore`
 - [ ] Set up automated backups (cron job)
 
 ### Monitoring Checklist
+
 - [ ] Grafana dashboards accessible
 - [ ] Prometheus collecting metrics
 - [ ] Loki receiving logs
