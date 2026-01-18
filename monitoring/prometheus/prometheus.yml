@@ -1,0 +1,53 @@
+---
+# Prometheus Configuration
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+  scrape_timeout: 10s
+  external_labels:
+    cluster: 'qbittorrent-vpn'
+    environment: 'production'
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+
+# Load rules
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # cAdvisor - Docker container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          service: 'cadvisor'
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'container_.*'
+        action: keep
+
+  # Gluetun VPN metrics
+  - job_name: 'gluetun'
+    static_configs:
+      - targets: ['gluetun:8000']
+        labels:
+          service: 'gluetun'
+
+  # Node exporter (if added)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node-exporter'

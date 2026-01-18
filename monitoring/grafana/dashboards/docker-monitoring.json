@@ -1,0 +1,52 @@
+{
+  "dashboard": {
+    "title": "Docker Container Monitoring",
+    "tags": ["docker", "containers"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Container CPU Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{name=~\".+\"}[5m]) * 100",
+            "legendFormat": "{{ name }}"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Container Memory Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "container_memory_usage_bytes{name=~\".+\"}",
+            "legendFormat": "{{ name }}"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Network I/O",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(container_network_receive_bytes_total{name=~\".+\"}[5m])",
+            "legendFormat": "{{ name }} RX"
+          },
+          {
+            "expr": "rate(container_network_transmit_bytes_total{name=~\".+\"}[5m])",
+            "legendFormat": "{{ name }} TX"
+          }
+        ]
+      }
+    ]
+  }
+}
