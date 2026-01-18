@@ -38,7 +38,6 @@ set -euo pipefail
 BLUE='\033[0;34m'      # For informational messages
 GREEN='\033[0;32m'     # For success messages
 YELLOW='\033[1;33m'    # For progress messages
-RED='\033[0;31m'       # For error messages
 NC='\033[0m'           # No Color (reset to default)
 
 # ──────────────────────────────────────────────────────────────────────
