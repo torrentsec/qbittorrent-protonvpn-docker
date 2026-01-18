@@ -35,7 +35,7 @@ Using `network_mode: service:gluetun`:
 
 ## Network Topology
 
-```
+```text
 ┌─────────────────────────────────────────────┐
 │           Docker Host                        │
 │                                              │
