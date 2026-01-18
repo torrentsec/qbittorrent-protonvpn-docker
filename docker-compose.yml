@@ -83,7 +83,7 @@ services:
       - QBITTORRENT_INTERFACE=tun0  # 🔒 Forces all traffic through VPN interface
      
      # 🔄 Port Forwarding Mod (Syncs qBittorrent with Gluetun)
-      - DOCKER_MODS=ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main
+      - DOCKER_MODS=ghcr.io/t-anc/gsp-qbittorrent-gluetun-sync-port-mod:main
       - GSP_GTN_API_KEY=${GSP_GTN_API_KEY:-randomapikey}  # API key for port forwarding updates
       - GSP_QBITTORRENT_PORT=${GSP_QBITTORRENT_PORT:-53764}  # Torrenting port (auto-updated by Gluetun)
       - GSP_MINIMAL_LOGS=false  # Enables full logs for debugging purposes
