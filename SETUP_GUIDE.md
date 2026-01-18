@@ -4,7 +4,8 @@
 
 ### Step 1: Get Your Temporary Password
 
-When qBittorrent starts for the first time, it generates a temporary admin password. You need this to log in.
+When qBittorrent starts for the first time, it generates a temporary admin
+password. You need this to log in.
 
 **Get the password with this command:**
 
@@ -60,7 +61,9 @@ For the port forwarding sync mod to work, you MUST enable localhost bypass:
 1. Click "**Save**"
 
 **Why this is needed:**
-The port sync mod runs on localhost and needs to communicate with qBittorrent's API without authentication. If this isn't enabled, port forwarding won't sync automatically.
+The port sync mod runs on localhost and needs to communicate with
+qBittorrent's API without authentication. If this isn't enabled, port
+forwarding won't sync automatically.
 
 ## Common Issues & Solutions
 
@@ -111,7 +114,8 @@ docker inspect gluetun | grep IPAddress
 **Symptoms:**
 
 ```text
-[GSP] - [ERROR] The "Bypass authentication for clients on localhost" setting is not set.
+[GSP] - [ERROR] The "Bypass authentication for clients on
+localhost" setting is not set.
 [GSP] - Init checks failed, exiting the mod.
 ```
 

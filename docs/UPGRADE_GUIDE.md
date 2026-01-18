@@ -2,7 +2,8 @@
 
 ## Overview
 
-This guide helps you upgrade from the basic setup to the advanced infrastructure implementation.
+This guide helps you upgrade from the basic setup to the advanced
+infrastructure implementation.
 
 ## What's New
 
@@ -46,6 +47,7 @@ Before upgrading:
 - At least 5GB free disk space
 
 Check your versions:
+
 ```bash
 docker --version
 docker-compose --version
@@ -73,12 +75,14 @@ cp -r qbittorrent backup_$(date +%Y%m%d)/ 2>/dev/null || true
 docker run --rm \
   -v qbittorrent-protonvpn-docker_gluetun-config:/source \
   -v $(pwd)/backup_$(date +%Y%m%d):/backup \
-  alpine tar czf /backup/gluetun-volume.tar.gz -C /source .
+  alpine tar czf /backup/gluetun-volume.tar.gz \
+    -C /source .
 
 docker run --rm \
   -v qbittorrent-protonvpn-docker_qbittorrent-config:/source \
   -v $(pwd)/backup_$(date +%Y%m%d):/backup \
-  alpine tar czf /backup/qbittorrent-volume.tar.gz -C /source .
+  alpine tar czf /backup/qbittorrent-volume.tar.gz \
+    -C /source .
 
 echo "Backup complete in backup_$(date +%Y%m%d)/"
 ```
@@ -131,7 +135,8 @@ VPN_FORWARDED_PORT=0
 ### Step 4: Create Required Directories
 
 ```bash
-mkdir -p monitoring/{prometheus,grafana/{provisioning/{datasources,dashboards},dashboards},loki,promtail}
+mkdir -p monitoring/{prometheus,grafana/{provisioning/\
+{datasources,dashboards},dashboards},loki,promtail}
 mkdir -p scripts downloads incomplete
 ```
 
@@ -149,7 +154,8 @@ make validate
 
 # Or manually:
 
-docker-compose config > /dev/null && echo "✓ Valid" || echo "✗ Invalid"
+docker-compose config > /dev/null && \
+  echo "✓ Valid" || echo "✗ Invalid"
 ```
 
 ### Step 6: Stop Old Setup
@@ -162,7 +168,8 @@ docker-compose down
 
 # Optional: Remove old networks
 
-docker network rm qbittorrent-protonvpn-docker_default 2>/dev/null || true
+docker network rm qbittorrent-protonvpn-docker_default \
+  2>/dev/null || true
 ```
 
 ### Step 7: Start New Setup
@@ -314,7 +321,8 @@ This is expected! qBittorrent should ONLY access internet through VPN.
 
 # Verify VPN routing
 
-docker exec qbittorrent curl -s https://ipinfo.io/json
+docker exec qbittorrent curl -s \
+  https://ipinfo.io/json
 
 # Should show ProtonVPN IP, not your real IP
 
@@ -367,11 +375,13 @@ cp backup_YYYYMMDD/.env .
 
 # Restore volumes (if needed)
 
-docker volume create qbittorrent-protonvpn-docker_gluetun-config
+docker volume create \
+  qbittorrent-protonvpn-docker_gluetun-config
 docker run --rm \
   -v qbittorrent-protonvpn-docker_gluetun-config:/target \
   -v $(pwd)/backup_YYYYMMDD:/backup \
-  alpine tar xzf /backup/gluetun-volume.tar.gz -C /target
+  alpine tar xzf /backup/gluetun-volume.tar.gz \
+    -C /target
 
 # Start old setup
 
@@ -443,7 +453,8 @@ If you encounter issues:
 After successful upgrade:
 
 1. ✅ Explore Grafana dashboards
-1. ✅ Setup regular backups: `crontab -e` → `0 2 * * * cd /path/to/project && make backup`
+1. ✅ Setup regular backups: `crontab -e` →
+   `0 2 * * * cd /path/to/project && make backup`
 1. ✅ Configure alerts in Prometheus
 1. ✅ Review security settings
 1. ✅ Star the repository if helpful!

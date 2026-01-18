@@ -3,7 +3,9 @@
 [![CI/CD](https://github.com/torrentsec/qbittorrent-protonvpn-docker/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/torrentsec/qbittorrent-protonvpn-docker/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Production-grade infrastructure for running qBittorrent securely through ProtonVPN with comprehensive monitoring, automated operations, and enterprise-level best practices.**
+**Production-grade infrastructure for running qBittorrent securely through
+ProtonVPN with comprehensive monitoring, automated operations, and
+enterprise-level best practices.**
 
 ## 🌟 Highlights
 
@@ -152,13 +154,15 @@ make up
 
 ### Required
 
-- **Docker Engine** 20.10.0+ ([Install Docker](https://docs.docker.com/get-docker/))
+- **Docker Engine** 20.10.0+
+  ([Install Docker](https://docs.docker.com/get-docker/))
 - **Docker Compose** 2.0.0+ (bundled with Docker Desktop)
 - **ProtonVPN Account** (Plus/Unlimited for WireGuard + port forwarding)
 
 ### Optional
 
-- **Make** (pre-installed on macOS/Linux, [install on Windows](https://gnuwin32.sourceforge.net/packages/make.htm))
+- **Make** (pre-installed on macOS/Linux,
+  [install on Windows](https://gnuwin32.sourceforge.net/packages/make.htm))
 - **Pre-commit** (`pip install pre-commit`) for development
 - **Git** for version control
 
@@ -203,7 +207,8 @@ nano .env  # or use your preferred editor
 
 ```ini
 
-# ProtonVPN WireGuard private key (get from https://account.protonvpn.com/downloads)
+# ProtonVPN WireGuard private key
+# (get from https://account.protonvpn.com/downloads)
 
 WIREGUARD_PRIVATE_KEY=your_private_key_here
 
@@ -328,10 +333,12 @@ Access Grafana at <http://localhost:3000>
 **Default credentials**: admin / admin (change on first login)
 
 **Pre-configured datasources:**
+
 - Prometheus (metrics)
 - Loki (logs)
 
 **Recommended dashboards to import:**
+
 - Docker Container Monitoring: ID 893
 - cAdvisor Exporter: ID 14282
 - Loki Dashboard: ID 13639
@@ -341,12 +348,14 @@ Access Grafana at <http://localhost:3000>
 Access Prometheus at <http://localhost:9090>
 
 **Available metrics:**
+
 - Container CPU/Memory/Network usage
 - VPN connection status
 - Disk I/O and space usage
 - Service health checks
 
 **Pre-configured alerts:**
+
 - VPN connection down
 - Container failures
 - High resource usage
@@ -380,7 +389,8 @@ Real-time container resource usage and performance metrics.
 
 This setup provides **multiple layers** of leak prevention:
 
-1. **Network Namespace Sharing**: qBittorrent shares Gluetun's network, physically preventing direct internet access
+1. **Network Namespace Sharing**: qBittorrent shares Gluetun's network,
+   physically preventing direct internet access
 1. **Firewall Rules**: Gluetun's built-in firewall blocks non-VPN traffic
 1. **IPv6 Disabled**: Prevents IPv6 leaks
 1. **DNS over TLS**: Encrypted DNS queries via Cloudflare
@@ -479,8 +489,10 @@ make status
 ```
 
 **To reduce resource usage:**
+
 - Disable monitoring stack (comment out in docker-compose.yml)
-- Reduce Prometheus retention (edit monitoring/prometheus/prometheus.yml)
+- Reduce Prometheus retention
+  (edit monitoring/prometheus/prometheus.yml)
 - Limit container resources (add `deploy.resources.limits`)
 
 ### Container Won't Start
@@ -544,7 +556,8 @@ Edit `monitoring/prometheus/alerts.yml`:
 ```yaml
 
 - alert: HighDownloadSpeed
-  expr: rate(container_network_receive_bytes_total{name="qbittorrent"}[5m]) > 100000000
+  expr: rate(container_network_receive_bytes_total
+    {name="qbittorrent"}[5m]) > 100000000
   for: 5m
   labels:
     severity: info
@@ -600,9 +613,12 @@ networks:
 
 ### Available Documentation
 
-- **[Architecture](docs/ARCHITECTURE.md)** - System design and components
-- **[Upgrade Guide](docs/UPGRADE_GUIDE.md)** - Migration from previous versions
-- **[ADR 001](docs/adr/001-monitoring-stack.md)** - Monitoring stack decisions
+- **[Architecture](docs/ARCHITECTURE.md)** - System design and
+  components
+- **[Upgrade Guide](docs/UPGRADE_GUIDE.md)** - Migration from previous
+  versions
+- **[ADR 001](docs/adr/001-monitoring-stack.md)** - Monitoring stack
+  decisions
 - **[ADR 002](docs/adr/002-network-architecture.md)** - Network design
 - **[ADR 003](docs/adr/003-infrastructure-as-code.md)** - IaC approach
 
