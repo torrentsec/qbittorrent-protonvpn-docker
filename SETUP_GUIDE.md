@@ -4,8 +4,7 @@
 
 ### Step 1: Get Your Temporary Password
 
-When qBittorrent starts for the first time, it generates a temporary admin
-password. You need this to log in.
+When qBittorrent starts for the first time, it generates a temporary admin password. You need this to log in.
 
 **Get the password with this command:**
 
@@ -23,7 +22,7 @@ docker logs qbittorrent 2>&1 | grep -oP '(?<=password is: ).*'
 
 ```text
 ******** Information ********
-To control qBittorrent, access the WebUI at: <http://localhost:8080>
+To control qBittorrent, access the WebUI at: http://localhost:8080
 
 The WebUI administrator username is: admin
 The WebUI administrator password was not set. A temporary password is provided for this session: Ab3dEfG9hI
@@ -31,7 +30,7 @@ The WebUI administrator password was not set. A temporary password is provided f
 
 ### Step 2: Access qBittorrent
 
-1. Open your browser to: <http://localhost:8080>
+1. Open your browser to: [http://localhost:8080](http://localhost:8080)
 1. Username: **admin**
 1. Password: **[the temporary password from above]**
 
@@ -47,6 +46,7 @@ The WebUI administrator password was not set. A temporary password is provided f
 1. **Click "Save"**
 
 **Why this is critical:**
+
 - Temporary password changes every time the container restarts
 - If you don't set a permanent password, you'll be locked out after restarts
 
@@ -61,9 +61,8 @@ For the port forwarding sync mod to work, you MUST enable localhost bypass:
 1. Click "**Save**"
 
 **Why this is needed:**
-The port sync mod runs on localhost and needs to communicate with
-qBittorrent's API without authentication. If this isn't enabled, port
-forwarding won't sync automatically.
+
+The port sync mod runs on localhost and needs to communicate with qBittorrent's API without authentication. If this isn't enabled, port forwarding won't sync automatically.
 
 ## Common Issues & Solutions
 
@@ -71,7 +70,7 @@ forwarding won't sync automatically.
 
 **Symptoms:**
 
-- Can't access <http://localhost:8080>
+- Can't access [http://localhost:8080](http://localhost:8080)
 - Getting "Unauthorized" error
 - No login prompt
 
@@ -99,14 +98,11 @@ forwarding won't sync automatically.
 **Solution 2 - Access via Container IP:**
 
 ```bash
-
 # Get qBittorrent IP (it shares Gluetun's network)
-
 docker inspect gluetun | grep IPAddress
 
 # Access using that IP
-# Example: <http://172.20.0.10:8080>
-
+# Example: http://172.20.0.10:8080
 ```
 
 ### ❌ Issue: Port Sync Mod Errors
@@ -168,7 +164,7 @@ curl: (22) The requested URL returned error: 403
 
    ```bash
    # Check Gluetun's forwarded port
-   curl <http://localhost:8000/v1/openvpn/portforwarded>
+   curl http://localhost:8000/v1/openvpn/portforwarded
 
    # Should return something like: {"port":12345}
    ```
@@ -190,17 +186,13 @@ curl: (22) The requested URL returned error: 403
 Try these locations in order:
 
 ```bash
-
 # Location 1 (most common)
-
 ls -la ./qbittorrent/qBittorrent/qBittorrent.conf
 
 # Location 2
-
 ls -la ./qbittorrent/config/qBittorrent.conf
 
 # Location 3 (inside Docker volume)
-
 docker exec qbittorrent cat /config/qBittorrent/qBittorrent.conf
 ```
 
@@ -215,25 +207,19 @@ docker exec -it qbittorrent nano /config/qBittorrent/qBittorrent.conf
 Run these commands to check:
 
 ```bash
-
 # 1. Check VPN is connected
-
 make test-vpn
 
 # 2. Check qBittorrent is using VPN
-
 make test-qbittorrent
 
 # 3. Check port forwarding
-
 docker logs gluetun | grep "port forward" | tail -1
 
 # 4. Check port sync is working
-
 docker logs qbittorrent | grep GSP | tail -10
 
 # 5. View all service status
-
 make status
 ```
 
@@ -266,8 +252,8 @@ make status
 | Task | Command |
 |------|---------|
 | Get qBittorrent password | `docker logs qbittorrent 2>&1 \| grep "temporary password"` |
-| Access Web UI | <http://localhost:8080> |
-| Access Grafana | <http://localhost:3000> |
+| Access Web UI | [http://localhost:8080](http://localhost:8080) |
+| Access Grafana | [http://localhost:3000](http://localhost:3000) |
 | Test VPN | `make test-vpn` |
 | View logs | `make logs` |
 | Restart services | `make restart` |
@@ -279,4 +265,4 @@ make status
 - **Documentation**: See `docs/` folder
 - **Architecture**: See `docs/ARCHITECTURE.md`
 - **Commands**: Run `make help`
-- **Issues**: <https://github.com/torrentsec/qbittorrent-protonvpn-docker/issues>
+- **Issues**: [https://github.com/torrentsec/qbittorrent-protonvpn-docker/issues](https://github.com/torrentsec/qbittorrent-protonvpn-docker/issues)
