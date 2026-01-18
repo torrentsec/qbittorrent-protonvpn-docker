@@ -20,7 +20,7 @@ docker logs qbittorrent 2>&1 | grep -oP '(?<=password is: ).*'
 
 ### Login
 
-1. Open <http://localhost:8080>
+1. Open [http://localhost:8080](http://localhost:8080)
 1. Username: `admin`
 1. Password: `[temporary password from above]`
 
@@ -30,8 +30,7 @@ docker logs qbittorrent 2>&1 | grep -oP '(?<=password is: ).*'
 1. Set a new password under "Authentication"
 1. Click **Save**
 
-**If you skip this:** You'll need to retrieve the temp password after
-every container restart!
+**If you skip this:** You'll need to retrieve the temp password after every container restart!
 
 ## 🔧 Enable Port Sync (Required!)
 
@@ -66,8 +65,7 @@ Restart: `make restart`
 ```bash
 docker inspect gluetun | grep IPAddress
 
-# Access via: <http://[IP]:8080>
-
+# Access via: http://[IP]:8080
 ```
 
 ### Port Sync Errors
@@ -80,6 +78,7 @@ localhost" setting is not set.
 ```
 
 **Fix:**
+
 - Enable "Bypass authentication for localhost" (see above)
 - Restart qBittorrent
 - Verify: `docker logs qbittorrent | grep GSP`
@@ -93,24 +92,19 @@ Try these in order:
 ./qbittorrent/config/qBittorrent.conf
 
 # Or edit inside container:
-
 docker exec -it qbittorrent nano /config/qBittorrent/qBittorrent.conf
 ```
 
 ## ✅ Verification
 
 ```bash
-
 # Check VPN
-
 make test-vpn
 
 # Check port forwarding
-
 docker logs gluetun | grep "port forward"
 
 # Check sync mod
-
 docker logs qbittorrent | grep GSP | tail -10
 ```
 
@@ -119,7 +113,7 @@ docker logs qbittorrent | grep GSP | tail -10
 | Action | Command |
 |--------|---------|
 | Get temp password | `docker logs qbittorrent 2>&1 \| grep "temporary password"` |
-| Access Web UI | <http://localhost:8080> |
+| Access Web UI | [http://localhost:8080](http://localhost:8080) |
 | Restart qBittorrent | `docker restart qbittorrent` |
 | View logs | `docker logs qbittorrent` |
 | Edit config | `docker exec -it qbittorrent nano /config/qBittorrent/qBittorrent.conf` |

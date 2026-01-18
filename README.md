@@ -85,31 +85,26 @@ This is a **complete infrastructure-as-code** solution featuring:
 ### One-Command Setup
 
 ```bash
-
 # Clone the repository
-
 git clone https://github.com/torrentsec/qbittorrent-protonvpn-docker.git
 cd qbittorrent-protonvpn-docker
 
 # Initialize (creates .env from template)
-
 make init
 
 # Edit .env with your ProtonVPN credentials
-
 nano .env
 
 # Start everything
-
 make up
 ```
 
 ### Access Services
 
-- **qBittorrent Web UI**: <http://localhost:8080>
-- **Grafana Dashboard**: <http://localhost:3000> (admin/admin)
-- **Prometheus**: <http://localhost:9090>
-- **cAdvisor**: <http://localhost:8081>
+- **qBittorrent Web UI**: [http://localhost:8080](http://localhost:8080)
+- **Grafana Dashboard**: [http://localhost:3000](http://localhost:3000) (admin/admin)
+- **Prometheus**: [http://localhost:9090](http://localhost:9090)
+- **cAdvisor**: [http://localhost:8081](http://localhost:8081)
 
 ---
 
@@ -146,7 +141,7 @@ make up
 - Named volumes for persistent data
 - Security-first approach with minimal privileges
 
-📚 **Detailed documentation**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+**Detailed documentation**: See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
 ---
 
@@ -154,15 +149,13 @@ make up
 
 ### Required
 
-- **Docker Engine** 20.10.0+
-  ([Install Docker](https://docs.docker.com/get-docker/))
+- **Docker Engine** 20.10.0+ ([Install Docker](https://docs.docker.com/get-docker/))
 - **Docker Compose** 2.0.0+ (bundled with Docker Desktop)
 - **ProtonVPN Account** (Plus/Unlimited for WireGuard + port forwarding)
 
 ### Optional
 
-- **Make** (pre-installed on macOS/Linux,
-  [install on Windows](https://gnuwin32.sourceforge.net/packages/make.htm))
+- **Make** (pre-installed on macOS/Linux, [install on Windows](https://gnuwin32.sourceforge.net/packages/make.htm))
 - **Pre-commit** (`pip install pre-commit`) for development
 - **Git** for version control
 
@@ -206,29 +199,23 @@ nano .env  # or use your preferred editor
 **Essential variables:**
 
 ```ini
-
 # ProtonVPN WireGuard private key
 # (get from https://account.protonvpn.com/downloads)
-
 WIREGUARD_PRIVATE_KEY=your_private_key_here
 
 # VPN server location
-
 SERVER_COUNTRIES=Netherlands
 SERVER_CITIES=Amsterdam
 
 # User settings
-
 PUID=1000  # Run: id -u
 PGID=1000  # Run: id -g
 TZ=America/New_York
 
 # API key for port sync (generate: openssl rand -hex 32)
-
 GSP_GTN_API_KEY=your_random_api_key_here
 
 # Monitoring credentials
-
 GRAFANA_USER=admin
 GRAFANA_PASSWORD=your_secure_password
 ```
@@ -328,7 +315,7 @@ make help          # Show all available commands
 
 ### Grafana Dashboards
 
-Access Grafana at <http://localhost:3000>
+Access Grafana at [http://localhost:3000](http://localhost:3000)
 
 **Default credentials**: admin / admin (change on first login)
 
@@ -345,7 +332,7 @@ Access Grafana at <http://localhost:3000>
 
 ### Prometheus Metrics
 
-Access Prometheus at <http://localhost:9090>
+Access Prometheus at [http://localhost:9090](http://localhost:9090)
 
 **Available metrics:**
 
@@ -364,11 +351,13 @@ Access Prometheus at <http://localhost:9090>
 ### Logs
 
 **View in Grafana:**
+
 1. Go to Explore
 1. Select "Loki" datasource
 1. Use LogQL queries
 
 **Example queries:**
+
 ```logql
 {container="gluetun"}
 {container="qbittorrent"} |= "error"
@@ -377,7 +366,7 @@ Access Prometheus at <http://localhost:9090>
 
 ### cAdvisor
 
-Access cAdvisor at <http://localhost:8081>
+Access cAdvisor at [http://localhost:8081](http://localhost:8081)
 
 Real-time container resource usage and performance metrics.
 
@@ -389,8 +378,7 @@ Real-time container resource usage and performance metrics.
 
 This setup provides **multiple layers** of leak prevention:
 
-1. **Network Namespace Sharing**: qBittorrent shares Gluetun's network,
-   physically preventing direct internet access
+1. **Network Namespace Sharing**: qBittorrent shares Gluetun's network, physically preventing direct internet access
 1. **Firewall Rules**: Gluetun's built-in firewall blocks non-VPN traffic
 1. **IPv6 Disabled**: Prevents IPv6 leaks
 1. **DNS over TLS**: Encrypted DNS queries via Cloudflare
@@ -438,103 +426,80 @@ CI/CD pipeline automatically scans:
 ### VPN Not Connecting
 
 ```bash
-
 # Check Gluetun logs
-
 make logs-gluetun
 
 # Common issues:
 # - Incorrect WIREGUARD_PRIVATE_KEY
 # - Invalid SERVER_COUNTRIES
 # - ProtonVPN subscription level (need Plus/Unlimited)
-
 ```
 
 ### qBittorrent Can't Download
 
 ```bash
-
 # Verify VPN routing
-
 make test-qbittorrent
 
 # Should show ProtonVPN IP, not your real IP
 # If showing real IP, VPN is not working
-
 ```
 
 ### Port Not Forwarded
 
 ```bash
-
 # Check Gluetun logs for port forwarding
-
 docker logs gluetun | grep "port forward"
 
 # Ensure VPN_PORT_FORWARDING=on in docker-compose.yml
-
 ```
 
 ### High Resource Usage
 
 ```bash
-
 # Check resource usage
-
 make status
 
 # View detailed metrics at cAdvisor
-# Open <http://localhost:8081>
-
+# Open http://localhost:8081
 ```
 
 **To reduce resource usage:**
 
 - Disable monitoring stack (comment out in docker-compose.yml)
-- Reduce Prometheus retention
-  (edit monitoring/prometheus/prometheus.yml)
+- Reduce Prometheus retention (edit monitoring/prometheus/prometheus.yml)
 - Limit container resources (add `deploy.resources.limits`)
 
 ### Container Won't Start
 
 ```bash
-
 # Check all logs
-
 make logs
 
 # Rebuild containers
-
 make rebuild
 
 # Check Docker resource allocation
-
 docker system df
 ```
 
 ### Lost Grafana Password
 
 ```bash
-
 # Reset Grafana admin password
-
 docker exec -it grafana grafana-cli admin reset-admin-password newpassword
 ```
 
 ### Backup Failed
 
 ```bash
-
 # Check disk space
-
 df -h
 
 # Check backup directory permissions
-
 ls -la backups/
 
 # Manual backup
-
 ./scripts/backup.sh
 ```
 
@@ -554,10 +519,8 @@ ls -la backups/
 Edit `monitoring/prometheus/alerts.yml`:
 
 ```yaml
-
 - alert: HighDownloadSpeed
-  expr: rate(container_network_receive_bytes_total
-    {name="qbittorrent"}[5m]) > 100000000
+  expr: rate(container_network_receive_bytes_total{name="qbittorrent"}[5m]) > 100000000
   for: 5m
   labels:
     severity: info
@@ -602,6 +565,7 @@ networks:
 ### External Access (Advanced)
 
 **Not recommended** for security, but possible via reverse proxy:
+
 - Use Nginx Proxy Manager or Traefik
 - Add authentication layer
 - Use HTTPS with Let's Encrypt
@@ -613,12 +577,9 @@ networks:
 
 ### Available Documentation
 
-- **[Architecture](docs/ARCHITECTURE.md)** - System design and
-  components
-- **[Upgrade Guide](docs/UPGRADE_GUIDE.md)** - Migration from previous
-  versions
-- **[ADR 001](docs/adr/001-monitoring-stack.md)** - Monitoring stack
-  decisions
+- **[Architecture](docs/ARCHITECTURE.md)** - System design and components
+- **[Upgrade Guide](docs/UPGRADE_GUIDE.md)** - Migration from previous versions
+- **[ADR 001](docs/adr/001-monitoring-stack.md)** - Monitoring stack decisions
 - **[ADR 002](docs/adr/002-network-architecture.md)** - Network design
 - **[ADR 003](docs/adr/003-infrastructure-as-code.md)** - IaC approach
 
@@ -648,17 +609,13 @@ Contributions are welcome! Please:
 ### Development Setup
 
 ```bash
-
 # Install development tools
-
 pip install pre-commit
 
 # Install hooks
-
 pre-commit install
 
 # Run all checks
-
 pre-commit run --all-files
 ```
 
@@ -694,9 +651,9 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 ![GitHub issues](https://img.shields.io/github/issues/torrentsec/qbittorrent-protonvpn-docker)
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/torrentsec/qbittorrent-protonvpn-docker)
 
-**Maintained**: Actively developed and maintained
-**Production Ready**: Suitable for production use
-**Well Documented**: Comprehensive documentation available
+- **Maintained**: Actively developed and maintained
+- **Production Ready**: Suitable for production use
+- **Well Documented**: Comprehensive documentation available
 
 ---
 
