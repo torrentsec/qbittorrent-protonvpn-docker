@@ -23,8 +23,8 @@ This is a **complete infrastructure-as-code** solution featuring:
 
 1. [Features](#-features)
 1. [Quick Start](#-quick-start)
-1. [Architecture](#-architecture)
-1. [Prerequisites](#-prerequisites)
+1. [Architecture](#️-architecture)
+1. [Prerequisites](#️-prerequisites)
 1. [Installation](#-installation)
 1. [Operations](#-operations)
 1. [Monitoring](#-monitoring)
@@ -141,6 +141,7 @@ make up
 ```
 
 **Key Design Decisions:**
+
 - qBittorrent shares Gluetun's network namespace (zero-leak guarantee)
 - Separate monitoring network for observability isolation
 - Named volumes for persistent data
@@ -364,11 +365,13 @@ Access Prometheus at <http://localhost:9090>
 ### Logs
 
 **View in Grafana:**
+
 1. Go to Explore
 1. Select "Loki" datasource
 1. Use LogQL queries
 
 **Example queries:**
+
 ```logql
 {container="gluetun"}
 {container="qbittorrent"} |= "error"
@@ -602,6 +605,7 @@ networks:
 ### External Access (Advanced)
 
 **Not recommended** for security, but possible via reverse proxy:
+
 - Use Nginx Proxy Manager or Traefik
 - Add authentication layer
 - Use HTTPS with Let's Encrypt
@@ -666,7 +670,8 @@ pre-commit run --all-files
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see the
+[LICENSE](LICENSE) file for details.
 
 ---
 

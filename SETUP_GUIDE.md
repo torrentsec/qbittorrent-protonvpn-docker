@@ -47,6 +47,7 @@ The WebUI administrator password was not set. A temporary password is provided f
 1. **Click "Save"**
 
 **Why this is critical:**
+
 - Temporary password changes every time the container restarts
 - If you don't set a permanent password, you'll be locked out after restarts
 
@@ -264,7 +265,7 @@ make status
 ## Quick Reference
 
 | Task | Command |
-|------|---------|
+| ---- | ------- |
 | Get qBittorrent password | `docker logs qbittorrent 2>&1 \| grep "temporary password"` |
 | Access Web UI | <http://localhost:8080> |
 | Access Grafana | <http://localhost:3000> |

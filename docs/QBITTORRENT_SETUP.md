@@ -80,6 +80,7 @@ localhost" setting is not set.
 ```
 
 **Fix:**
+
 - Enable "Bypass authentication for localhost" (see above)
 - Restart qBittorrent
 - Verify: `docker logs qbittorrent | grep GSP`
@@ -117,7 +118,7 @@ docker logs qbittorrent | grep GSP | tail -10
 ## Quick Reference
 
 | Action | Command |
-|--------|---------|
+| ------ | ------- |
 | Get temp password | `docker logs qbittorrent 2>&1 \| grep "temporary password"` |
 | Access Web UI | <http://localhost:8080> |
 | Restart qBittorrent | `docker restart qbittorrent` |
