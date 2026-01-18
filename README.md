@@ -8,6 +8,7 @@
 ## 🌟 Highlights
 
 This is a **complete infrastructure-as-code** solution featuring:
+
 - 🔒 **Zero-leak VPN enforcement** - qBittorrent physically cannot bypass VPN
 - 📊 **Full observability stack** - Prometheus, Grafana, Loki monitoring
 - 🤖 **Automated operations** - Makefile, backup/restore, CI/CD
@@ -19,23 +20,24 @@ This is a **complete infrastructure-as-code** solution featuring:
 ## 📌 Table of Contents
 
 1. [Features](#-features)
-2. [Quick Start](#-quick-start)
-3. [Architecture](#-architecture)
-4. [Prerequisites](#-prerequisites)
-5. [Installation](#-installation)
-6. [Operations](#-operations)
-7. [Monitoring](#-monitoring)
-8. [Security](#-security)
-9. [Troubleshooting](#-troubleshooting)
-10. [Advanced Topics](#-advanced-topics)
-11. [Contributing](#-contributing)
-12. [License](#-license)
+1. [Quick Start](#-quick-start)
+1. [Architecture](#-architecture)
+1. [Prerequisites](#-prerequisites)
+1. [Installation](#-installation)
+1. [Operations](#-operations)
+1. [Monitoring](#-monitoring)
+1. [Security](#-security)
+1. [Troubleshooting](#-troubleshooting)
+1. [Advanced Topics](#-advanced-topics)
+1. [Contributing](#-contributing)
+1. [License](#-license)
 
 ---
 
 ## ✨ Features
 
 ### Core Infrastructure
+
 - ✅ **VPN-Enforced Torrenting** - All traffic through ProtonVPN WireGuard
 - ✅ **Automatic Port Forwarding** - Synced with ProtonVPN for optimal speeds
 - ✅ **Network Segmentation** - Separate VPN and monitoring networks
@@ -44,6 +46,7 @@ This is a **complete infrastructure-as-code** solution featuring:
 - ✅ **Version Pinning** - Reproducible deployments
 
 ### Monitoring & Observability
+
 - 📊 **Prometheus** - Metrics collection and alerting
 - 📈 **Grafana** - Beautiful dashboards and visualization
 - 📝 **Loki + Promtail** - Centralized log aggregation
@@ -51,6 +54,7 @@ This is a **complete infrastructure-as-code** solution featuring:
 - 🔔 **Alerting** - VPN failures, resource usage, container health
 
 ### Automation & Operations
+
 - 🔧 **Makefile** - One-command operations (`make up`, `make backup`, etc.)
 - 💾 **Backup/Restore** - Automated configuration and data backups
 - 🔄 **Watchtower** - Automatic container updates
@@ -58,6 +62,7 @@ This is a **complete infrastructure-as-code** solution featuring:
 - 🎣 **Pre-commit Hooks** - Prevent errors before they're committed
 
 ### Security & Compliance
+
 - 🔒 **Security Hardening** - Minimal capabilities, no-new-privileges
 - 🔍 **Vulnerability Scanning** - Trivy security scans in CI/CD
 - 🛡️ **DNS over TLS** - Encrypted DNS queries
@@ -65,6 +70,7 @@ This is a **complete infrastructure-as-code** solution featuring:
 - 🔐 **Secrets Management** - Environment-based configuration
 
 ### Documentation
+
 - 📖 **Architecture Docs** - Comprehensive system design documentation
 - 📝 **ADRs** - Architecture Decision Records
 - 🔄 **Upgrade Guide** - Step-by-step migration instructions
@@ -77,17 +83,22 @@ This is a **complete infrastructure-as-code** solution featuring:
 ### One-Command Setup
 
 ```bash
+
 # Clone the repository
+
 git clone https://github.com/torrentsec/qbittorrent-protonvpn-docker.git
 cd qbittorrent-protonvpn-docker
 
 # Initialize (creates .env from template)
+
 make init
 
 # Edit .env with your ProtonVPN credentials
+
 nano .env
 
 # Start everything
+
 make up
 ```
 
@@ -140,16 +151,19 @@ make up
 ## 🛠️ Prerequisites
 
 ### Required
+
 - **Docker Engine** 20.10.0+ ([Install Docker](https://docs.docker.com/get-docker/))
 - **Docker Compose** 2.0.0+ (bundled with Docker Desktop)
 - **ProtonVPN Account** (Plus/Unlimited for WireGuard + port forwarding)
 
 ### Optional
+
 - **Make** (pre-installed on macOS/Linux, [install on Windows](https://gnuwin32.sourceforge.net/packages/make.htm))
 - **Pre-commit** (`pip install pre-commit`) for development
 - **Git** for version control
 
 ### System Requirements
+
 - **RAM**: 2GB minimum (4GB recommended with monitoring)
 - **Disk**: 5GB free space
 - **OS**: Linux, macOS, or Windows with WSL2
@@ -172,6 +186,7 @@ make init
 ```
 
 This will:
+
 - Check Docker and Docker Compose are installed
 - Create `.env` from `.env.example`
 - Create required directories
@@ -187,22 +202,28 @@ nano .env  # or use your preferred editor
 **Essential variables:**
 
 ```ini
+
 # ProtonVPN WireGuard private key (get from https://account.protonvpn.com/downloads)
+
 WIREGUARD_PRIVATE_KEY=your_private_key_here
 
 # VPN server location
+
 SERVER_COUNTRIES=Netherlands
 SERVER_CITIES=Amsterdam
 
 # User settings
+
 PUID=1000  # Run: id -u
 PGID=1000  # Run: id -g
 TZ=America/New_York
 
 # API key for port sync (generate: openssl rand -hex 32)
+
 GSP_GTN_API_KEY=your_random_api_key_here
 
 # Monitoring credentials
+
 GRAFANA_USER=admin
 GRAFANA_PASSWORD=your_secure_password
 ```
@@ -260,6 +281,7 @@ make restore       # Restore from backup (interactive)
 ```
 
 Backups include:
+
 - All configurations
 - Docker volumes
 - Environment settings (sanitized)
@@ -334,8 +356,8 @@ Access Prometheus at <http://localhost:9090>
 
 **View in Grafana:**
 1. Go to Explore
-2. Select "Loki" datasource
-3. Use LogQL queries
+1. Select "Loki" datasource
+1. Use LogQL queries
 
 **Example queries:**
 ```logql
@@ -359,10 +381,10 @@ Real-time container resource usage and performance metrics.
 This setup provides **multiple layers** of leak prevention:
 
 1. **Network Namespace Sharing**: qBittorrent shares Gluetun's network, physically preventing direct internet access
-2. **Firewall Rules**: Gluetun's built-in firewall blocks non-VPN traffic
-3. **IPv6 Disabled**: Prevents IPv6 leaks
-4. **DNS over TLS**: Encrypted DNS queries via Cloudflare
-5. **Health Checks**: Automatic VPN connection monitoring
+1. **Firewall Rules**: Gluetun's built-in firewall blocks non-VPN traffic
+1. **IPv6 Disabled**: Prevents IPv6 leaks
+1. **DNS over TLS**: Encrypted DNS queries via Cloudflare
+1. **Health Checks**: Automatic VPN connection monitoring
 
 ### Container Security
 
@@ -386,6 +408,7 @@ make security  # Run Trivy scans
 ```
 
 CI/CD pipeline automatically scans:
+
 - Docker images for CVEs
 - Repository for secrets
 - Configuration for issues
@@ -393,10 +416,10 @@ CI/CD pipeline automatically scans:
 ### Best Practices
 
 1. **Change default passwords** (Grafana, qBittorrent)
-2. **Use strong API keys** (`openssl rand -hex 32`)
-3. **Keep containers updated** (Watchtower handles this)
-4. **Regular backups** (`make backup`)
-5. **Monitor alerts** (check Grafana)
+1. **Use strong API keys** (`openssl rand -hex 32`)
+1. **Keep containers updated** (Watchtower handles this)
+1. **Regular backups** (`make backup`)
+1. **Monitor alerts** (check Grafana)
 
 ---
 
@@ -405,42 +428,54 @@ CI/CD pipeline automatically scans:
 ### VPN Not Connecting
 
 ```bash
+
 # Check Gluetun logs
+
 make logs-gluetun
 
 # Common issues:
 # - Incorrect WIREGUARD_PRIVATE_KEY
 # - Invalid SERVER_COUNTRIES
 # - ProtonVPN subscription level (need Plus/Unlimited)
+
 ```
 
 ### qBittorrent Can't Download
 
 ```bash
+
 # Verify VPN routing
+
 make test-qbittorrent
 
 # Should show ProtonVPN IP, not your real IP
 # If showing real IP, VPN is not working
+
 ```
 
 ### Port Not Forwarded
 
 ```bash
+
 # Check Gluetun logs for port forwarding
+
 docker logs gluetun | grep "port forward"
 
 # Ensure VPN_PORT_FORWARDING=on in docker-compose.yml
+
 ```
 
 ### High Resource Usage
 
 ```bash
+
 # Check resource usage
+
 make status
 
 # View detailed metrics at cAdvisor
 # Open <http://localhost:8081>
+
 ```
 
 **To reduce resource usage:**
@@ -451,33 +486,43 @@ make status
 ### Container Won't Start
 
 ```bash
+
 # Check all logs
+
 make logs
 
 # Rebuild containers
+
 make rebuild
 
 # Check Docker resource allocation
+
 docker system df
 ```
 
 ### Lost Grafana Password
 
 ```bash
+
 # Reset Grafana admin password
+
 docker exec -it grafana grafana-cli admin reset-admin-password newpassword
 ```
 
 ### Backup Failed
 
 ```bash
+
 # Check disk space
+
 df -h
 
 # Check backup directory permissions
+
 ls -la backups/
 
 # Manual backup
+
 ./scripts/backup.sh
 ```
 
@@ -488,15 +533,16 @@ ls -la backups/
 ### Custom Grafana Dashboards
 
 1. Create dashboard in Grafana UI
-2. Export as JSON
-3. Save to `monitoring/grafana/dashboards/`
-4. Restart Grafana: `docker-compose restart grafana`
+1. Export as JSON
+1. Save to `monitoring/grafana/dashboards/`
+1. Restart Grafana: `docker-compose restart grafana`
 
 ### Adding Alerts
 
 Edit `monitoring/prometheus/alerts.yml`:
 
 ```yaml
+
 - alert: HighDownloadSpeed
   expr: rate(container_network_receive_bytes_total{name="qbittorrent"}[5m]) > 100000000
   for: 5m
@@ -575,24 +621,28 @@ networks:
 Contributions are welcome! Please:
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Install pre-commit hooks (`pre-commit install`)
-4. Make your changes
-5. Run tests (`make validate`)
-6. Commit (`git commit -m 'Add amazing feature'`)
-7. Push (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
+1. Create a feature branch (`git checkout -b feature/amazing-feature`)
+1. Install pre-commit hooks (`pre-commit install`)
+1. Make your changes
+1. Run tests (`make validate`)
+1. Commit (`git commit -m 'Add amazing feature'`)
+1. Push (`git push origin feature/amazing-feature`)
+1. Open a Pull Request
 
 ### Development Setup
 
 ```bash
+
 # Install development tools
+
 pip install pre-commit
 
 # Install hooks
+
 pre-commit install
 
 # Run all checks
+
 pre-commit run --all-files
 ```
 

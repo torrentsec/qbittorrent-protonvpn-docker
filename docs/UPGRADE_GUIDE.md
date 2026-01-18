@@ -7,12 +7,14 @@ This guide helps you upgrade from the basic setup to the advanced infrastructure
 ## What's New
 
 ### Infrastructure Improvements
+
 - ✅ Production-grade Docker Compose v3.9 configuration
 - ✅ Advanced network segmentation (VPN + Monitoring networks)
 - ✅ Version pinning for all images (reproducible builds)
 - ✅ Enhanced security (capabilities, security-opt, firewalls)
 
 ### Monitoring & Observability
+
 - ✅ Full Prometheus metrics stack
 - ✅ Grafana dashboards
 - ✅ Loki log aggregation
@@ -20,6 +22,7 @@ This guide helps you upgrade from the basic setup to the advanced infrastructure
 - ✅ Centralized logging with Promtail
 
 ### Operations & Automation
+
 - ✅ Makefile for infrastructure automation
 - ✅ Backup and restore scripts
 - ✅ Pre-commit hooks for validation
@@ -27,6 +30,7 @@ This guide helps you upgrade from the basic setup to the advanced infrastructure
 - ✅ Security scanning (Trivy)
 
 ### Documentation
+
 - ✅ Architecture documentation
 - ✅ Architecture Decision Records (ADRs)
 - ✅ Comprehensive README updates
@@ -35,6 +39,7 @@ This guide helps you upgrade from the basic setup to the advanced infrastructure
 ## Prerequisites
 
 Before upgrading:
+
 - Docker Engine 20.10.0+
 - Docker Compose 2.0.0+
 - At least 2GB free RAM (for monitoring stack)
@@ -51,16 +56,20 @@ docker-compose --version
 **CRITICAL**: Always backup before upgrading!
 
 ```bash
+
 # Stop containers
+
 docker-compose down
 
 # Backup current configuration
+
 mkdir -p backup_$(date +%Y%m%d)
 cp docker-compose.yml backup_$(date +%Y%m%d)/
 cp .env backup_$(date +%Y%m%d)/
 cp -r qbittorrent backup_$(date +%Y%m%d)/ 2>/dev/null || true
 
 # Backup Docker volumes
+
 docker run --rm \
   -v qbittorrent-protonvpn-docker_gluetun-config:/source \
   -v $(pwd)/backup_$(date +%Y%m%d):/backup \
@@ -87,10 +96,13 @@ git pull origin claude-vibe-dev
 ### Step 2: Review New Configuration
 
 ```bash
+
 # Compare your .env with new .env.example
+
 diff .env .env.example
 
 # Review new variables
+
 cat .env.example
 ```
 
@@ -99,16 +111,20 @@ cat .env.example
 Add new variables to your `.env`:
 
 ```bash
+
 # New monitoring variables
+
 GRAFANA_USER=admin
 GRAFANA_PASSWORD=your_secure_password_here
 LOG_LEVEL=info
 
 # New storage configuration (optional)
+
 DOWNLOADS_PATH=./downloads
 INCOMPLETE_PATH=./incomplete
 
 # New VPN variable
+
 VPN_FORWARDED_PORT=0
 ```
 
@@ -122,49 +138,64 @@ mkdir -p scripts downloads incomplete
 ### Step 5: Validate New Configuration
 
 ```bash
+
 # Check if Makefile works
+
 make help
 
 # Validate docker-compose
+
 make validate
 
 # Or manually:
+
 docker-compose config > /dev/null && echo "✓ Valid" || echo "✗ Invalid"
 ```
 
 ### Step 6: Stop Old Setup
 
 ```bash
+
 # Stop all containers
+
 docker-compose down
 
 # Optional: Remove old networks
+
 docker network rm qbittorrent-protonvpn-docker_default 2>/dev/null || true
 ```
 
 ### Step 7: Start New Setup
 
 ```bash
+
 # Start with new configuration
+
 make up
 
 # Or manually:
+
 docker-compose up -d
 ```
 
 ### Step 8: Verify Services
 
 ```bash
+
 # Check service status
+
 make status
 
 # View logs
+
 make logs
 
 # Test VPN connection
+
 make test-vpn
 
 # Test qBittorrent VPN routing
+
 make test-qbittorrent
 ```
 
@@ -190,13 +221,17 @@ Open in your browser:
 ### 2. Setup Pre-commit Hooks (Optional)
 
 ```bash
+
 # Install pre-commit
+
 pip install pre-commit
 
 # Install hooks
+
 pre-commit install
 
 # Run once to verify
+
 pre-commit run --all-files
 ```
 
@@ -207,10 +242,13 @@ Edit `monitoring/prometheus/alerts.yml` to customize alert thresholds.
 ### 4. Test Backup System
 
 ```bash
+
 # Create test backup
+
 make backup
 
 # Verify backup created
+
 ls -lh backups/
 ```
 
@@ -219,10 +257,13 @@ ls -lh backups/
 ### Containers Not Starting
 
 ```bash
+
 # Check logs
+
 docker-compose logs
 
 # Check specific service
+
 docker-compose logs gluetun
 docker-compose logs qbittorrent
 ```
@@ -232,17 +273,22 @@ docker-compose logs qbittorrent
 If ports 3000, 8080, 8081, 9090, or 3100 are in use:
 
 ```bash
+
 # Find what's using the port
+
 sudo lsof -i :3000
 
 # Modify docker-compose.yml to use different ports
 # Example: "3001:3000" instead of "3000:3000"
+
 ```
 
 ### Network Issues
 
 ```bash
+
 # Recreate networks
+
 docker network prune
 docker-compose up -d
 ```
@@ -250,10 +296,13 @@ docker-compose up -d
 ### VPN Not Connecting
 
 ```bash
+
 # Check Gluetun logs
+
 docker-compose logs -f gluetun
 
 # Verify .env has correct WIREGUARD_PRIVATE_KEY
+
 cat .env | grep WIREGUARD
 ```
 
@@ -262,10 +311,13 @@ cat .env | grep WIREGUARD
 This is expected! qBittorrent should ONLY access internet through VPN.
 
 ```bash
+
 # Verify VPN routing
+
 docker exec qbittorrent curl -s https://ipinfo.io/json
 
 # Should show ProtonVPN IP, not your real IP
+
 ```
 
 ### Monitoring Stack Using Too Much RAM
@@ -273,7 +325,7 @@ docker exec qbittorrent curl -s https://ipinfo.io/json
 Reduce resource usage:
 
 1. Edit `docker-compose.yml`
-2. Add resource limits:
+1. Add resource limits:
 
 ```yaml
 services:
@@ -284,7 +336,7 @@ services:
           memory: 512M
 ```
 
-3. Restart: `make restart`
+1. Restart: `make restart`
 
 ### Prometheus Storage Full
 
@@ -300,16 +352,21 @@ command:
 If you need to rollback:
 
 ```bash
+
 # Stop new setup
+
 docker-compose down
 
 # Restore old docker-compose.yml
+
 cp backup_YYYYMMDD/docker-compose.yml .
 
 # Restore .env
+
 cp backup_YYYYMMDD/.env .
 
 # Restore volumes (if needed)
+
 docker volume create qbittorrent-protonvpn-docker_gluetun-config
 docker run --rm \
   -v qbittorrent-protonvpn-docker_gluetun-config:/target \
@@ -317,6 +374,7 @@ docker run --rm \
   alpine tar xzf /backup/gluetun-volume.tar.gz -C /target
 
 # Start old setup
+
 docker-compose up -d
 ```
 
@@ -346,11 +404,11 @@ New setup requires additional resources:
    # Comment out monitoring services in docker-compose.yml
    ```
 
-2. **Reduce retention**:
+1. **Reduce retention**:
    - Prometheus: 7 days instead of 30
    - Loki: 7 days instead of 31
 
-3. **Disable Watchtower** for manual updates:
+1. **Disable Watchtower** for manual updates:
    ```yaml
    # Comment out watchtower service
    ```
@@ -376,23 +434,24 @@ New setup requires additional resources:
 If you encounter issues:
 
 1. Check troubleshooting section above
-2. Review logs: `make logs`
-3. Check GitHub Issues
-4. Join community discussions
+1. Review logs: `make logs`
+1. Check GitHub Issues
+1. Join community discussions
 
 ## Next Steps
 
 After successful upgrade:
 
 1. ✅ Explore Grafana dashboards
-2. ✅ Setup regular backups: `crontab -e` → `0 2 * * * cd /path/to/project && make backup`
-3. ✅ Configure alerts in Prometheus
-4. ✅ Review security settings
-5. ✅ Star the repository if helpful!
+1. ✅ Setup regular backups: `crontab -e` → `0 2 * * * cd /path/to/project && make backup`
+1. ✅ Configure alerts in Prometheus
+1. ✅ Review security settings
+1. ✅ Star the repository if helpful!
 
 ## Questions?
 
 Check the documentation:
+
 - `docs/ARCHITECTURE.md` - System design
 - `docs/adr/` - Architecture decisions
 - `make help` - Available commands

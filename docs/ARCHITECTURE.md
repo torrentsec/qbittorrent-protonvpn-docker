@@ -46,6 +46,7 @@ This document describes the architecture of the qBittorrent + ProtonVPN Docker i
 ### Core Services
 
 #### Gluetun (VPN)
+
 - **Purpose**: Provides secure VPN tunnel via ProtonVPN
 - **Technology**: WireGuard protocol
 - **Key Features**:
@@ -56,6 +57,7 @@ This document describes the architecture of the qBittorrent + ProtonVPN Docker i
 - **Network**: Bridge to VPN provider, local bridge for qBittorrent
 
 #### qBittorrent
+
 - **Purpose**: BitTorrent client
 - **Technology**: LinuxServer.io container with VueTorrent UI
 - **Key Features**:
@@ -67,6 +69,7 @@ This document describes the architecture of the qBittorrent + ProtonVPN Docker i
 ### Monitoring Stack
 
 #### Prometheus
+
 - **Purpose**: Metrics collection and storage
 - **Scrape Targets**:
   - cAdvisor (container metrics)
@@ -76,6 +79,7 @@ This document describes the architecture of the qBittorrent + ProtonVPN Docker i
 - **Port**: 9090
 
 #### Grafana
+
 - **Purpose**: Visualization and dashboards
 - **Data Sources**:
   - Prometheus (metrics)
@@ -83,6 +87,7 @@ This document describes the architecture of the qBittorrent + ProtonVPN Docker i
 - **Port**: 3000
 
 #### Loki + Promtail
+
 - **Purpose**: Log aggregation
 - **Technology**: Grafana Loki stack
 - **Features**:
@@ -92,6 +97,7 @@ This document describes the architecture of the qBittorrent + ProtonVPN Docker i
 - **Ports**: 3100 (Loki)
 
 #### cAdvisor
+
 - **Purpose**: Container resource usage monitoring
 - **Metrics**: CPU, memory, network, disk I/O
 - **Port**: 8081
@@ -99,6 +105,7 @@ This document describes the architecture of the qBittorrent + ProtonVPN Docker i
 ### Supporting Services
 
 #### Watchtower
+
 - **Purpose**: Automatic container updates
 - **Schedule**: Daily checks
 - **Features**:
@@ -129,12 +136,12 @@ Monitoring Network (172.21.0.0/16)
 1. **Torrent Traffic**:
    - qBittorrent → Gluetun → WireGuard → ProtonVPN → Internet
 
-2. **Monitoring Traffic**:
+1. **Monitoring Traffic**:
    - All containers → Promtail → Loki
    - Prometheus scrapes → cAdvisor, Gluetun
    - Grafana queries → Prometheus, Loki
 
-3. **Web UI Access**:
+1. **Web UI Access**:
    - User → localhost:8080 → Gluetun → qBittorrent
    - User → localhost:3000 → Grafana
    - User → localhost:9090 → Prometheus
@@ -148,18 +155,18 @@ Monitoring Network (172.21.0.0/16)
    - qBittorrent has NO direct internet access
    - All traffic through VPN tunnel
 
-2. **Container Security**:
+1. **Container Security**:
    - `no-new-privileges` security option
    - Minimal capabilities (CAP_NET_ADMIN only for Gluetun)
    - Read-only mounts where possible
 
-3. **VPN Security**:
+1. **VPN Security**:
    - WireGuard encryption
    - DNS over TLS
    - IPv6 disabled (leak prevention)
    - Firewall rules enforce VPN-only traffic
 
-4. **Secrets Management**:
+1. **Secrets Management**:
    - Environment variables for sensitive data
    - .env file excluded from version control
    - Docker secrets for production
@@ -225,17 +232,17 @@ Project Structure:
    - Docker Compose validation
    - Required files check
 
-2. **Security**:
+1. **Security**:
    - Trivy vulnerability scanning
    - Secret detection
    - Security advisories
 
-3. **Testing**:
+1. **Testing**:
    - Configuration testing
    - Shell script linting
    - Markdown linting
 
-4. **Quality Gates**:
+1. **Quality Gates**:
    - All checks must pass
    - Security vulnerabilities reviewed
    - Code quality maintained
