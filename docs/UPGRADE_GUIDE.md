@@ -365,6 +365,7 @@ New setup requires additional resources:
    ```
 
 1. **Reduce retention**:
+
    - Prometheus: 7 days instead of 30
    - Loki: 7 days instead of 31
 
