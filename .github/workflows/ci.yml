@@ -1,0 +1,185 @@
+---
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop, claude-vibe-dev]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  # ──────────────────────────────────────────────────────────────────
+  # 🔍 Validation Job
+  # ──────────────────────────────────────────────────────────────────
+  validate:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate docker-compose.yml
+        run: |
+          docker compose config > /dev/null
+          echo "✓ docker-compose.yml is valid"
+
+      - name: Check for required files
+        run: |
+          test -f docker-compose.yml || exit 1
+          test -f Makefile || exit 1
+          test -f .env.example || exit 1
+          echo "✓ All required files present"
+
+      - name: Validate YAML files
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          file_or_dir: |
+            docker-compose.yml
+            monitoring/**/*.yml
+            .github/workflows/*.yml
+          config_data: |
+            extends: default
+            rules:
+              line-length:
+                max: 120
+                level: warning
+              comments:
+                min-spaces-from-content: 1
+
+  # ──────────────────────────────────────────────────────────────────
+  # 🔒 Security Scanning Job
+  # ──────────────────────────────────────────────────────────────────
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner on Gluetun
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'ghcr.io/qdm12/gluetun:v3.39.1'
+          format: 'sarif'
+          output: 'trivy-gluetun-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Run Trivy vulnerability scanner on qBittorrent
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'lscr.io/linuxserver/qbittorrent:4.6.7'
+          format: 'sarif'
+          output: 'trivy-qbittorrent-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy Gluetun results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-gluetun-results.sarif'
+          category: 'trivy-gluetun'
+
+      - name: Upload Trivy qBittorrent results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-qbittorrent-results.sarif'
+          category: 'trivy-qbittorrent'
+
+      - name: Run Trivy on repository
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-repo-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+  # ──────────────────────────────────────────────────────────────────
+  # 🐋 Docker Compose Test Job
+  # ──────────────────────────────────────────────────────────────────
+  docker-test:
+    name: Docker Compose Test
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create test .env file
+        run: |
+          cat > .env << EOF
+          WIREGUARD_PRIVATE_KEY=test_key
+          SERVER_COUNTRIES=Netherlands
+          SERVER_CITIES=
+          VPN_FORWARDED_PORT=0
+          PUID=1000
+          PGID=1000
+          TZ=UTC
+          GSP_GTN_API_KEY=test_api_key
+          GRAFANA_USER=admin
+          GRAFANA_PASSWORD=admin
+          LOG_LEVEL=info
+          DOWNLOADS_PATH=./downloads
+          INCOMPLETE_PATH=./incomplete
+          EOF
+
+      - name: Validate docker-compose with test env
+        run: docker compose config > /dev/null
+
+      - name: Check Docker Compose syntax
+        run: docker compose config --quiet
+
+  # ──────────────────────────────────────────────────────────────────
+  # 📝 Linting Job
+  # ──────────────────────────────────────────────────────────────────
+  lint:
+    name: Lint Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Lint shell scripts
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: './scripts'
+          severity: warning
+
+      - name: Check Markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v18
+        with:
+          globs: '**/*.md'
+
+  # ──────────────────────────────────────────────────────────────────
+  # 📦 Build Status Badge
+  # ──────────────────────────────────────────────────────────────────
+  build-status:
+    name: Build Status
+    runs-on: ubuntu-latest
+    needs: [validate, security, docker-test, lint]
+    if: always()
+    steps:
+      - name: Check build status
+        run: |
+          if [ "${{ needs.validate.result }}" == "success" ] && \
+             [ "${{ needs.security.result }}" == "success" ] && \
+             [ "${{ needs.docker-test.result }}" == "success" ] && \
+             [ "${{ needs.lint.result }}" == "success" ]; then
+            echo "✓ All checks passed"
+            exit 0
+          else
+            echo "✗ Some checks failed"
+            exit 1
+          fi

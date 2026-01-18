@@ -1,0 +1,59 @@
+---
+# Prometheus Alerting Rules
+groups:
+  - name: infrastructure
+    interval: 30s
+    rules:
+      # VPN Connection Alert
+      - alert: VPNConnectionDown
+        expr: up{job="gluetun"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: vpn
+        annotations:
+          summary: "VPN connection is down"
+          description: "Gluetun VPN container has been down for more than 2 minutes"
+
+      # Container Down Alert
+      - alert: ContainerDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.job }} is down"
+          description: "{{ $labels.job }} has been down for more than 5 minutes"
+
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: rate(container_cpu_usage_seconds_total[5m]) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "High CPU usage detected"
+          description: "Container {{ $labels.name }} CPU usage is above 80% for 10 minutes"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (container_memory_usage_bytes / container_spec_memory_limit_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "High memory usage detected"
+          description: "Container {{ $labels.name }} memory usage is above 90%"
+
+      # Disk Space Alert
+      - alert: LowDiskSpace
+        expr: (container_fs_usage_bytes / container_fs_limit_bytes) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          component: storage
+        annotations:
+          summary: "Low disk space"
+          description: "Container {{ $labels.name }} disk usage is above 85%"
