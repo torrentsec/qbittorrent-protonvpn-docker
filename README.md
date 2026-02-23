@@ -93,11 +93,19 @@ PUID=1000
 PGID=1000
 TZ=Europe/London
 
-GLUETUN_USER=your_admin_username
-GLUETUN_PASS=your_admin_password
-
 GSP_GTN_API_KEY=your_random_api_key_here
 GSP_QBITTORRENT_PORT=your_forwarded_port_here
+
+#required if qBittorrent "Bypass authentication for clients on localhost" is disabled in qBittorrent webUI settings
+GSP_QBT_USERNAME=username 
+GSP_QBT_PASSWORD=password
+
+# download location i.e. /mnt/media/Downloads
+MNT_DOWNLOAD_LOCATION=/mnt/media/Downloads
+
+# optional - set equal to what is set as the download location in qBittorrent
+# download location set in qBittorrent default=downloads
+QBT_DOWNLOAD_LOCATION=/mnt/media/downloads
 ```
 
 Save and close (`CTRL + X`, then `Y`, then `ENTER`).
@@ -130,11 +138,7 @@ Make sure to change your web UI password after the first login. Otherwise, the p
 
    - The `.gitignore` file **already prevents **`.env`** from being uploaded to GitHub.**
 
-2. **Use a Strong Password for Gluetun API**
-
-   - **Modify **`GLUETUN_PASS`** in **`.env` to prevent unauthorized API access.
-
-3. **Verify VPN Connectivity Before Torrenting**
+2. **Verify VPN Connectivity Before Torrenting**
 
    - Run `curl ifconfig.me` inside the container:
      ```sh
@@ -158,6 +162,25 @@ If Gluetun isn’t running, restart everything:
 ```sh
 docker-compose down && docker-compose up -d
 ```
+
+If qBittorrent reports permission denied when downloading:
+
+set PUID/PGID correctly
+use the command "user" id to find PUID/PGID
+
+```sh
+root id
+```
+
+if not setting the port properly:
+
+uncomment this line in docker compose:
+- HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE='{"auth":"none"}'
+
+comment out this line:
+ - HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={"auth":"apikey","apikey":"${GSP_GTN_API_KEY:-randomapikey}"}
+
+NOTE: this is insecure and should be reenabled/debugged before using
 
 ### **Verify qBittorrent is Using VPN**
 

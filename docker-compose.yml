@@ -40,8 +40,12 @@ services:
       - SERVER_COUNTRIES=${SERVER_COUNTRIES}  # Preferred VPN server country selection
       - SERVER_CITIES=${SERVER_CITIES}  # (Optional) Restrict to a specific city
       - VPN_PORT_FORWARDING=on  # Enables automatic port forwarding (needed for torrenting)
+#      - VPN_PORT_FORWARDING_PROVIDER=protonvpn #gluetun can actually update the port itself, this can work I think, but needs protonVPN user/pass and other config, not sure if it updates regularly w/o restarting
       - TZ=${TZ}  # Sets the timezone for correct timestamps in logs
       - QBT_WEBUI_ENABLED=true  # ✅ Ensures Web UI is always enabled
+#      - HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE='{"auth":"apikey","apikey":"insert api key here"}' #add your api key here -hardcoded
+      - HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={"auth":"apikey","apikey":"${GSP_GTN_API_KEY:-randomapikey}"}  #new toml stuff, allows not having .toml file to use the api
+#      - HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE='{"auth":"none"}' #this bypass authentication, only use for debugging if port forwards aren't working
 
     # ─── Persistent Storage ────────────────────────────────────────────
     volumes:
@@ -74,26 +78,29 @@ services:
       gluetun:
         condition: service_healthy  # Ensures qBittorrent starts only when the VPN is fully functional
 
-    # ─── qBittorrent Configuration ─────────────────────────────────────
+   # ─── qBittorrent Configuration ─────────────────────────────────────
     environment:
       - PUID=${PUID}  # User ID (ensures correct file permissions)
       - PGID=${PGID}  # Group ID (ensures correct file ownership)
       - TZ=${TZ}  # Timezone for logs and schedules
       - WEBUI_PORT=8080  # Sets qBittorrent's Web UI to port 8080
       - QBITTORRENT_INTERFACE=tun0  # 🔒 Forces all traffic through VPN interface
-     
+
      # 🔄 Port Forwarding Mod (Syncs qBittorrent with Gluetun)
       - DOCKER_MODS=ghcr.io/t-anc/gsp-qbittorent-gluetun-sync-port-mod:main
       - GSP_GTN_API_KEY=${GSP_GTN_API_KEY:-randomapikey}  # API key for port forwarding updates
       - GSP_QBITTORRENT_PORT=${GSP_QBITTORRENT_PORT:-53764}  # Torrenting port (auto-updated by Gluetun)
       - GSP_MINIMAL_LOGS=false  # Enables full logs for debugging purposes
+      - GSP_QBT_USERNAME=${GSP_QBT_USERNAME} #allows qBittorrent to not require bypass local auth
+      - GSP_QBT_PASSWORD=${GSP_QBT_PASSWORD} #allows qBittorrent to not require bypass local auth
     # ─── Persistent Storage ────────────────────────────────────────────
-    
+
     volumes:
       - ./qbittorrent:/config   # Stores qBittorrent settings persistently
-      - ./incomplete:/incomplete  # ⚡ Temporary download location (reduces SSD wear)
-      - ./:/downloads  # ✅ Completed torrents move here
-
+     # - ./incomplete:/incomplete  # ⚡ Temporary download location (reduces SSD wear)#got rid of this since it chews up the docker container storage
+#      - ./:/downloads  # ✅ Completed torrents move here
+#      - /mnt/media/Downloads:/mnt/media/Downloads
+      - ${MNT_DOWNLOAD_LOCATION}:${QBT_DOWNLOAD_LOCATION} #this allows someone to set the download location in qbittorrent to stop sonarr/radarr squawking at default location
     # ─── Performance Optimization ──────────────────────────────────────
     ulimits:
       nofile:
@@ -104,7 +111,7 @@ services:
   # 🔄 WATCHTOWER - Automatically Updates Select Docker Containers
   # ──────────────────────────────────────────────────────────────────────
   watchtower:
-    image: containrrr/watchtower
+    image: nickfedor/watchtower:latest #containrrr/watchtower
     container_name: watchtower
     restart: unless-stopped
     volumes:
