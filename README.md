@@ -1,3 +1,35 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="center">
+        <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=it">Italiano</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=id">Bahasa Indonesia</a>
+        | <a href="https://openaitx.github.io/view.html?user=torrentsec&project=qbittorrent-protonvpn-docker&lang=as">অসমীয়া</
+      </div>
+    </div>
+  </details>
+</div>
+
 # 🏰️ qBittorrent + ProtonVPN (WireGuard) in Docker (macOS)
 
 **Securely run qBittorrent in Docker with ProtonVPN (WireGuard) using Gluetun, ensuring full VPN routing and automatic port forwarding for improved torrenting performance.**
